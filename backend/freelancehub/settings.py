@@ -60,19 +60,24 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'freelancehub.wsgi.application'
 
-# Database: SQLite locally, PostgreSQL on Railway
+# Database: SQLite locally, PostgreSQL on Render
 DATABASE_URL = config('DATABASE_URL', default='')
 if DATABASE_URL:
-    # Railway provides DATABASE_URL automatically
-    import dj_database_url
-    DATABASES = {'default': dj_database_url.parse(DATABASE_URL)}
+    import urllib.parse as urlparse
+    url = urlparse.urlparse(DATABASE_URL)
+    DATABASES = {'default': {
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     url.path[1:],
+        'USER':     url.username,
+        'PASSWORD': url.password,
+        'HOST':     url.hostname,
+        'PORT':     url.port,
+    }}
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',,
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+    DATABASES = {'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }}
 
 AUTH_USER_MODEL = 'api.User'
 
