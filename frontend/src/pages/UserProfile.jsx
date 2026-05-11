@@ -59,7 +59,7 @@ export default function UserProfile() {
       // Fall back to mock or current user
       if (MOCK_SELLERS[id]) {
         setProfile(MOCK_SELLERS[id])
-      } else if (currentUser && (id === 'me' || id === currentUser.id)) {
+      } else if (currentUser && (id === 'me' || id === currentUser.id?.toString())) {
         // Show current user's profile
         setProfile({
           ...currentUser,

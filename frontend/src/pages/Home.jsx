@@ -99,7 +99,19 @@ export default function Home() {
       const params = {}
       if (cat !== 'All') params.category = cat
       const res = await api.get('/api/gigs/', { params })
-      setGigs(res.data.length ? res.data : MOCK.filter(g => cat === 'All' || g.category === cat))
+      let fetched = res.data.length ? res.data : MOCK.filter(g => cat === 'All' || g.category === cat)
+      fetched = fetched.map(g => {
+        if (!g.img || g.img.includes('unsplash.com')) {
+          const c = g.category?.toLowerCase() || ''
+          if (c.includes('dev')) g.img = '/images/gig_dev.png'
+          else if (c.includes('design')) g.img = '/images/gig_design.png'
+          else if (c.includes('writ')) g.img = '/images/gig_writing.png'
+          else if (c.includes('market')) g.img = '/images/gig_marketing.png'
+          else g.img = '/images/gig_dev.png'
+        }
+        return g
+      })
+      setGigs(fetched)
     } catch {
       setGigs(cat === 'All' ? MOCK : MOCK.filter(g => g.category === cat))
     } finally { setLoading(false) }

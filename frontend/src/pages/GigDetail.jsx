@@ -29,7 +29,18 @@ export default function GigDetail() {
   const [ordered, setOrdered] = useState(false)
 
   useEffect(() => {
-    api.get(`/api/gigs/${id}/`).then(r => setGig(r.data)).catch(() => setGig(MOCK[id] || MOCK[1]))
+    api.get(`/api/gigs/${id}/`).then(r => {
+      let g = r.data;
+      if (!g.img || g.img.includes('unsplash.com')) {
+        const c = g.category?.toLowerCase() || '';
+        if (c.includes('dev')) g.img = '/images/gig_dev.png';
+        else if (c.includes('design')) g.img = '/images/gig_design.png';
+        else if (c.includes('writ')) g.img = '/images/gig_writing.png';
+        else if (c.includes('market')) g.img = '/images/gig_marketing.png';
+        else g.img = '/images/gig_dev.png';
+      }
+      setGig(g);
+    }).catch(() => setGig(MOCK[id] || MOCK[1]))
   }, [id])
 
   const pkgs = gig ? {
