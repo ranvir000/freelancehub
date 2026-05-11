@@ -31,10 +31,14 @@ function GigCard({ gig }) {
     onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='' }}>
       {/* Thumbnail */}
       <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
-        <img src={gig.img} alt={gig.title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
-          onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)' }}
-        />
+        {gig.img ? (
+          <img src={gig.img} alt={gig.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+            onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }} />
+        )}
         {gig.badge && (
           <span style={{
             position:'absolute', top:10, left:10,
@@ -119,7 +123,7 @@ export default function Home() {
           <div className="badge badge-purple" style={{ marginBottom:16, fontSize:12 }}>
             🚀 India's #1 Student Freelance Platform
           </div>
-          <h1 style={{ color:'#fff', fontSize:'clamp(2rem,5vw,3.2rem)', fontWeight:800, lineHeight:1.15, marginBottom:20 }}>
+          <h1 style={{ color:'#fff', fontSize:'clamp(2rem,5vw,3.2rem)', fontWeight:800, lineHeight:1.3, marginBottom:20 }}>
             Find the perfect<br/>
             <span style={{ color:'#a5b4fc' }}>freelance service</span><br/>
             for your project

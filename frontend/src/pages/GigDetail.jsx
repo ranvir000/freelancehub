@@ -85,11 +85,13 @@ export default function GigDetail() {
         {/* Left */}
         <div>
           {/* Gig image */}
-          {gig.img && (
+          {gig.img ? (
             <div style={{ borderRadius:12, overflow:'hidden', marginBottom:20, border:'1px solid var(--border)' }}>
               <img src={gig.img} alt={gig.title} style={{ width:'100%', height:300, objectFit:'cover' }}
-                onError={e => e.target.parentElement.style.display='none'} />
+                onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)' }} />
             </div>
+          ) : (
+            <div style={{ borderRadius:12, overflow:'hidden', marginBottom:20, border:'1px solid var(--border)', width:'100%', height:300, background:'linear-gradient(135deg,#6366f1,#8b5cf6)' }} />
           )}
 
           {/* About */}

@@ -144,7 +144,10 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 .mobile-menu.open { display: flex; }
 
+.mobile-actions { display: none; }
+
 @media (max-width: 640px) {
   .hamburger  { display: flex; }
   .nav-links  { display: none !important; }
+  .mobile-actions { display: flex; }
 }

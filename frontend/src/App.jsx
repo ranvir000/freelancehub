@@ -194,10 +194,7 @@ function Navbar() {
         </div>
 
         {/* Mobile: theme toggle + hamburger */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div className="hamburger" style={{ display: 'none' }}>
-            {/* shown via CSS on mobile */}
-          </div>
+        <div className="mobile-actions" style={{ alignItems: 'center', gap: 10 }}>
           <ThemeToggle isHome={isHome} />
           <button
             className={`hamburger${menuOpen ? ' open' : ''}`}
