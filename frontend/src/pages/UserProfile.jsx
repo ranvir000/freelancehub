@@ -6,25 +6,42 @@ import { api, useAuth } from '../App.jsx'
 const MOCK_SELLERS = {
   s1: { id:'s1', name:'Ranvir Singh', role:'seller', bio:'Final-year B.Tech CSE student at GZSCCET. Expert in React, Django, PostgreSQL. Passionate about building scalable web applications.', skills:['React','Django','PostgreSQL','JWT','REST API','Docker'], rating:'4.9', reviewCount:80, completedOrders:80, joinedDate:'January 2025', location:'Bathinda, Punjab', img:null, gigs:[1,5], reviews:[{name:'Alex M.',rating:5,text:'Outstanding work! Delivered a complete app ahead of schedule.',date:'2 days ago'},{name:'Vikram B.',rating:5,text:'Clean code, great documentation. Will hire again.',date:'1 week ago'},{name:'Meera P.',rating:4,text:'Good communication and quality work.',date:'2 weeks ago'}] },
   s2: { id:'s2', name:'Neha Sharma', role:'seller', bio:'Creative designer specializing in brand identity and UI/UX. 3+ years of experience working with startups and SMEs across India.', skills:['Figma','Adobe Illustrator','Brand Identity','UI/UX','Logo Design','Prototyping'], rating:'4.8', reviewCount:204, completedOrders:204, joinedDate:'March 2024', location:'Chandigarh, Punjab', img:null, gigs:[2,6,10], reviews:[{name:'James T.',rating:5,text:'Amazing designs. Our brand looks world-class now!',date:'3 days ago'},{name:'Startup Founder.',rating:5,text:'Neha understood our vision perfectly.',date:'1 week ago'}] },
-  s3: { id:'s3', name:'Amit Verma',  role:'seller', bio:'Frontend developer focused on mobile-first experiences. Building responsive websites since 2022 with React and Tailwind CSS.', skills:['React','Tailwind CSS','HTML/CSS','SEO','Responsive Design'], rating:'4.7', reviewCount:89, completedOrders:89, joinedDate:'June 2024', location:'Ludhiana, Punjab', img:null, gigs:[3], reviews:[{name:'Dev K.',rating:5,text:'Super fast delivery and clean code.',date:'5 days ago'}] },
-  s4: { id:'s4', name:'Sara Liu',    role:'seller', bio:'Professional content writer and SEO specialist. Helping businesses rank on Google with high-quality, engaging content.', skills:['SEO Writing','Content Strategy','Keyword Research','Blog Posts','Technical Writing'], rating:'4.9', reviewCount:300, completedOrders:300, joinedDate:'November 2023', location:'Delhi, India', img:null, gigs:[4,9], reviews:[{name:'Amit V.',rating:5,text:'Traffic increased 40% after her articles!',date:'1 week ago'},{name:'Dev Team.',rating:5,text:'Best documentation we have ever had.',date:'2 weeks ago'}] },
-  s5: { id:'s5', name:'Kiran Mehta', role:'seller', bio:'Digital marketing expert specializing in paid ads and organic growth strategies. Managed ₹50L+ in ad spend across Google and Meta.', skills:['Google Ads','Meta Ads','SEO','Social Media','Analytics','PPC'], rating:'4.7', reviewCount:99, completedOrders:99, joinedDate:'February 2024', location:'Mumbai, Maharashtra', img:null, gigs:[7,11], reviews:[{name:'E-commerce Store.',rating:5,text:'ROAS went from 2x to 6x. Outstanding!',date:'1 month ago'},{name:'Meera P.',rating:5,text:'Followers grew 200% in one month!',date:'2 weeks ago'}] },
-  s6: { id:'s6', name:'Arjun Patel', role:'seller', bio:'Mobile and DevOps engineer. Built 4 apps on the Play Store. Expert in React Native, GitHub Actions, and cloud deployments.', skills:['React Native','GitHub Actions','Docker','AWS','CI/CD','iOS/Android'], rating:'4.9', reviewCount:73, completedOrders:73, joinedDate:'August 2024', location:'Ahmedabad, Gujarat', img:null, gigs:[8,12], reviews:[{name:'Rohan S.',rating:5,text:'App is live on Play Store. Amazing!',date:'3 weeks ago'},{name:'Dev Team.',rating:5,text:'Deploy time went from 2hr to 5min!',date:'3 weeks ago'}] },
+  s1: { id:'s1', name:'Ranvir Singh', role:'seller', bio:'Final-year B.Tech CSE student at GZSCCET. Expert in React, Django, PostgreSQL. Passionate about building scalable web applications.', skills:['React','Django','PostgreSQL','JWT','REST API','Docker'], rating:'4.9', reviewCount:80, completedOrders:80, joinedDate:'January 2025', location:'Bathinda, Punjab', img:'/images/user_s1.jpg', gigs:[1,5], reviews:[{name:'Alex M.',rating:5,text:'Outstanding work! Delivered a complete app ahead of schedule.',date:'2 days ago'},{name:'Vikram B.',rating:5,text:'Clean code, great documentation. Will hire again.',date:'1 week ago'},{name:'Meera P.',rating:4,text:'Good communication and quality work.',date:'2 weeks ago'}] },
+  s2: { id:'s2', name:'Neha Sharma', role:'seller', bio:'Creative designer specializing in brand identity and UI/UX. 3+ years of experience working with startups and SMEs across India.', skills:['Figma','Adobe Illustrator','Brand Identity','UI/UX','Logo Design','Prototyping'], rating:'4.8', reviewCount:204, completedOrders:204, joinedDate:'March 2024', location:'Chandigarh, Punjab', img:'/images/user_s2.jpg', gigs:[2,6,10], reviews:[{name:'James T.',rating:5,text:'Amazing designs. Our brand looks world-class now!',date:'3 days ago'},{name:'Startup Founder.',rating:5,text:'Neha understood our vision perfectly.',date:'1 week ago'}] },
+  s3: { id:'s3', name:'Amit Verma',  role:'seller', bio:'Frontend developer focused on mobile-first experiences. Building responsive websites since 2022 with React and Tailwind CSS.', skills:['React','Tailwind CSS','HTML/CSS','SEO','Responsive Design'], rating:'4.7', reviewCount:89, completedOrders:89, joinedDate:'June 2024', location:'Ludhiana, Punjab', img:'/images/user_s3.jpg', gigs:[3], reviews:[{name:'Dev K.',rating:5,text:'Super fast delivery and clean code.',date:'5 days ago'}] },
+  s4: { id:'s4', name:'Sara Liu',    role:'seller', bio:'Professional content writer and SEO specialist. Helping businesses rank on Google with high-quality, engaging content.', skills:['SEO Writing','Content Strategy','Keyword Research','Blog Posts','Technical Writing'], rating:'4.9', reviewCount:300, completedOrders:300, joinedDate:'November 2023', location:'Delhi, India', img:'/images/user_s4.jpg', gigs:[4,9], reviews:[{name:'Amit V.',rating:5,text:'Traffic increased 40% after her articles!',date:'1 week ago'},{name:'Dev Team.',rating:5,text:'Best documentation we have ever had.',date:'2 weeks ago'}] },
+  s5: { id:'s5', name:'Kiran Mehta', role:'seller', bio:'Digital marketing expert specializing in paid ads and organic growth strategies. Managed ₹50L+ in ad spend across Google and Meta.', skills:['Google Ads','Meta Ads','SEO','Social Media','Analytics','PPC'], rating:'4.7', reviewCount:99, completedOrders:99, joinedDate:'February 2024', location:'Mumbai, Maharashtra', img:'/images/user_s5.jpg', gigs:[7,11], reviews:[{name:'E-commerce Store.',rating:5,text:'ROAS went from 2x to 6x. Outstanding!',date:'1 month ago'},{name:'Meera P.',rating:5,text:'Followers grew 200% in one month!',date:'2 weeks ago'}] },
+  s6: { id:'s6', name:'Arjun Patel', role:'seller', bio:'Mobile and DevOps engineer. Built 4 apps on the Play Store. Expert in React Native, GitHub Actions, and cloud deployments.', skills:['React Native','GitHub Actions','Docker','AWS','CI/CD','iOS/Android'], rating:'4.9', reviewCount:73, completedOrders:73, joinedDate:'August 2024', location:'Ahmedabad, Gujarat', img:'/images/user_s6.jpg', gigs:[8,12], reviews:[{name:'Rohan S.',rating:5,text:'App is live on Play Store. Amazing!',date:'3 weeks ago'},{name:'Dev Team.',rating:5,text:'Deploy time went from 2hr to 5min!',date:'3 weeks ago'}] },
 }
 
-const GIG_TITLES = {
+const MOCK_GIGS = {
   1:'Full-stack web app with React & Django',
-  2:'Modern logo design for your brand',
+  2:'Modern logo for your brand',
   3:'Responsive website with React',
   4:'SEO-optimized blog posts',
   5:'REST API with Django & PostgreSQL',
-  6:'Stunning UI/UX design',
+  6:'Stunning UI/UX for your app',
   7:'Social media marketing strategy',
   8:'Mobile app with React Native',
   9:'Professional technical documentation',
   10:'Brand identity and style guide',
   11:'Google Ads campaigns & ROI',
   12:'CI/CD pipeline with GitHub Actions',
+}
+
+const GIG_IMAGES = {
+  1: '/images/gig_dev.png',
+  2: '/images/gig_design.png',
+  3: '/images/gig_dev.png',
+  4: '/images/gig_writing.png',
+  5: '/images/gig_dev.png',
+  6: '/images/gig_design.png',
+  7: '/images/gig_marketing.png',
+  8: '/images/gig_mobile.png',
+  9: '/images/gig_writing.png',
+  10: '/images/gig_design.png',
+  11: '/images/gig_marketing.png',
+  12: '/images/gig_devops.png',
 }
 
 export default function UserProfile() {
@@ -104,11 +121,15 @@ export default function UserProfile() {
       <div className="page-wrap" style={{ padding:'0 20px 40px' }}>
         {/* Avatar row */}
         <div style={{ display:'flex', alignItems:'flex-end', gap:20, marginTop:-40, marginBottom:24, flexWrap:'wrap' }}>
-          <div style={{
-            width:80, height:80, borderRadius:'50%', background:'var(--brand)',
-            color:'#fff', display:'flex', alignItems:'center', justifyContent:'center',
-            fontSize:28, fontWeight:800, border:'4px solid var(--bg)', flexShrink:0
-          }}>{initials}</div>
+          {profile.img ? (
+            <img src={profile.img} alt={profile.name} style={{ width:80, height:80, borderRadius:'50%', border:'4px solid var(--bg)', objectFit:'cover', flexShrink:0 }} />
+          ) : (
+            <div style={{
+              width:80, height:80, borderRadius:'50%', background:'var(--brand)',
+              color:'#fff', display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:28, fontWeight:800, border:'4px solid var(--bg)', flexShrink:0
+            }}>{initials}</div>
+          )}
           <div style={{ paddingBottom:8, flex:1 }}>
             <h1 style={{ fontSize:22, fontWeight:800, color:'var(--text)', marginBottom:4 }}>{profile.name}</h1>
             <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
@@ -160,13 +181,19 @@ export default function UserProfile() {
                       onClick={() => navigate(`/gig/${gigId}`)}
                       style={{
                         padding:'12px 16px', borderRadius:10, border:'1px solid var(--border)',
-                        cursor:'pointer', transition:'all 0.15s', background:'var(--card)'
+                        cursor:'pointer', transition:'all 0.15s', background:'var(--card)',
+                        display:'flex', alignItems:'center', gap:12
                       }}
                       onMouseEnter={e => e.currentTarget.style.borderColor='var(--brand)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor='var(--border)'}
                     >
-                      <p style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>
-                        🎯 {GIG_TITLES[gigId] || `Gig #${gigId}`}
+                      <div style={{
+                        width:80, height:60, borderRadius:8, flexShrink:0,
+                        background: `url(${GIG_IMAGES[gigId] || ''}) center/cover`,
+                        backgroundColor: 'var(--brand-l)', border:'1px solid var(--border)'
+                      }} />
+                      <p style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>
+                        {MOCK_GIGS[gigId] || `Gig #${gigId}`}
                       </p>
                     </div>
                   ))}

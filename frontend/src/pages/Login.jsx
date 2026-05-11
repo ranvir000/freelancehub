@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, useAuth, useToast } from '../App.jsx'
+import { useGoogleLogin } from '@react-oauth/google'
+import { jwtDecode } from 'jwt-decode'
+import axios from 'axios'
 
 function AuthLayout({ children, title, sub }) {
   return (
@@ -52,15 +55,30 @@ export function Login() {
     } finally { setLoading(false) }
   }
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        // Fetch user info using the access token
+        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        })
+        const data = userInfo.data
+        const googleUser = {
+          id: data.sub, name: data.name, email: data.email, role: 'buyer',
+          avatar: data.picture || 'https://lh3.googleusercontent.com/a/default-user'
+        }
+        login(googleUser, tokenResponse.access_token)
+        toast('Signed in with Google ✓')
+        navigate('/dashboard')
+      } catch (err) {
+        toast('Failed to fetch Google profile', 'error')
+      }
+    },
+    onError: () => toast('Google Sign-In Failed', 'error')
+  })
+
   function handleGoogle() {
-    // Demo: simulate Google login
-    const googleUser = {
-      id: 'g1', name: 'Google User', email: 'googleuser@gmail.com', role: 'buyer',
-      avatar: 'https://lh3.googleusercontent.com/a/default-user'
-    }
-    login(googleUser, 'google-demo-token')
-    toast('Signed in with Google ✓')
-    navigate('/dashboard')
+    googleLogin()
   }
 
   return (
@@ -142,13 +160,29 @@ export function Register() {
     } finally { setLoading(false) }
   }
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        })
+        const data = userInfo.data
+        const googleUser = {
+          id: data.sub, name: data.name, email: data.email, role: form.role,
+          avatar: data.picture || 'https://lh3.googleusercontent.com/a/default-user'
+        }
+        login(googleUser, tokenResponse.access_token)
+        toast('Signed up with Google ✓')
+        navigate('/dashboard')
+      } catch (err) {
+        toast('Failed to fetch Google profile', 'error')
+      }
+    },
+    onError: () => toast('Google Sign-In Failed', 'error')
+  })
+
   function handleGoogle() {
-    const googleUser = {
-      id: 'g_' + Date.now(), name: 'Google User', email: 'googleuser@gmail.com', role: form.role
-    }
-    login(googleUser, 'google-demo-token')
-    toast('Signed up with Google ✓')
-    navigate('/dashboard')
+    googleLogin()
   }
 
   return (

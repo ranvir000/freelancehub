@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import { LogOut, User, LayoutDashboard, Settings } from 'lucide-react'
 import './styles/global.css'
 
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -103,6 +105,7 @@ function Navbar() {
   const loc = useLocation()
   const isHome = loc.pathname === '/'
   const [menuOpen, setMenuOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
 
   // Close menu on route change
   useEffect(() => { setMenuOpen(false) }, [loc.pathname])
@@ -138,16 +141,47 @@ function Navbar() {
               }}>Admin</button>
             </Link>
           )}
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: 'var(--brand)', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            flexShrink: 0, border: '2px solid ' + (isHome ? 'rgba(255,255,255,0.4)' : 'var(--border)')
-          }} onClick={() => { setMenuOpen(false); navigate(`/profile/${user.id || 'me'}`) }}
-            title={`${user.name} — View Profile`}>
-            {user.name?.slice(0,2).toUpperCase() || 'ME'}
+          {/* Dynamic Profile Dropdown */}
+          <div style={{ position: 'relative' }} onMouseEnter={() => setProfileOpen(true)} onMouseLeave={() => setProfileOpen(false)}>
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: user.avatar ? `url(${user.avatar}) center/cover` : 'var(--brand)', 
+              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0, 
+              border: '2px solid ' + (isHome ? 'rgba(255,255,255,0.4)' : 'var(--border)'),
+              transition: 'border-color 0.2s'
+            }} onClick={() => { setMenuOpen(false); navigate(`/profile/${user.id || 'me'}`) }} title={`${user.name} — View Profile`}>
+              {!user.avatar && (user.name?.slice(0,2).toUpperCase() || 'ME')}
+            </div>
+            
+            <AnimatePresence>
+              {profileOpen && !mobile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  style={{
+                    position: 'absolute', top: '100%', right: 0, width: 240, marginTop: 8,
+                    background: 'var(--card)', borderRadius: 12, border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-md)', overflow: 'hidden', zIndex: 200
+                  }}
+                >
+                  <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+                    <p style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{user.name}</p>
+                    <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{user.email}</p>
+                    <div className="badge badge-purple" style={{ marginTop: 8 }}>{user.role}</div>
+                  </div>
+                  <div style={{ padding: 8 }}>
+                    <div className="dropdown-item" onClick={() => navigate(`/profile/${user.id || 'me'}`)}><User size={16}/> My Profile</div>
+                    <div className="dropdown-item" onClick={() => navigate('/dashboard')}><LayoutDashboard size={16}/> Dashboard</div>
+                    <div className="dropdown-item" style={{ color: 'var(--danger)' }} onClick={() => { logout(); navigate('/') }}><LogOut size={16}/> Sign Out</div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+          
           {mobile && (
             <button className="btn btn-danger btn-sm" style={{ width: '100%' }}
               onClick={() => { logout(); navigate('/'); setMenuOpen(false) }}>
@@ -225,6 +259,25 @@ import PostGig   from './pages/PostGig.jsx'
 import AdminPanel from './pages/AdminPanel.jsx'
 import UserProfile from './pages/UserProfile.jsx'
 
+// ── Page Transitions Wrapper ──────────────────────────────────────────────────
+function AnimatedRoutes() {
+  const loc = useLocation()
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={loc} key={loc.pathname}>
+        <Route path="/"           element={<motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-20}}><Home /></motion.div>} />
+        <Route path="/login"      element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Login /></motion.div>} />
+        <Route path="/register"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Register /></motion.div>} />
+        <Route path="/gig/:id"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><GigDetail /></motion.div>} />
+        <Route path="/profile/:id" element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><UserProfile /></motion.div>} />
+        <Route path="/dashboard"  element={<Protected><motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Dashboard /></motion.div></Protected>} />
+        <Route path="/post-gig"   element={<Protected role="seller"><motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><PostGig /></motion.div></Protected>} />
+        <Route path="/admin"      element={<Protected role="admin"><motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><AdminPanel /></motion.div></Protected>} />
+      </Routes>
+    </AnimatePresence>
+  )
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -232,16 +285,7 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <Navbar />
-            <Routes>
-              <Route path="/"           element={<Home />} />
-              <Route path="/login"      element={<Login />} />
-              <Route path="/register"   element={<Register />} />
-              <Route path="/gig/:id"    element={<GigDetail />} />
-              <Route path="/profile/:id" element={<UserProfile />} />
-              <Route path="/dashboard"  element={<Protected><Dashboard /></Protected>} />
-              <Route path="/post-gig"   element={<Protected role="seller"><PostGig /></Protected>} />
-              <Route path="/admin"      element={<Protected role="admin"><AdminPanel /></Protected>} />
-            </Routes>
+            <AnimatedRoutes />
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>

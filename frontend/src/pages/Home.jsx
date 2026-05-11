@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { api } from '../App.jsx'
 
-// ── 12 Mock gigs with real Unsplash images ────────────────────────────────────
+// ── 12 Mock gigs with local premium images ────────────────────────────────────
 const MOCK = [
-  { id:1,  title:'I will build a full-stack web app with React & Django',    category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:2499, rating:'4.9', review_count:48,  badge:'Top Rated',  img:'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=400&q=80' },
-  { id:2,  title:'I will design a modern logo for your brand',                category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:999,  rating:'4.8', review_count:128, badge:'Best Seller', img:'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80' },
-  { id:3,  title:'I will create a responsive website with React',             category:'Development', seller_name:'Amit Verma',    seller_id:'s3', price:1499, rating:'4.7', review_count:89,  badge:null,          img:'https://images.unsplash.com/photo-1547658719-da2b51169166?w=400&q=80' },
-  { id:4,  title:'I will write SEO-optimized blog posts for your site',       category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:499,  rating:'4.9', review_count:203, badge:'Popular',     img:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80' },
-  { id:5,  title:'I will build a REST API with Django & PostgreSQL',          category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:1999, rating:'5.0', review_count:32,  badge:null,          img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&q=80' },
-  { id:6,  title:'I will design a stunning UI/UX for your app',               category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:1499, rating:'4.8', review_count:76,  badge:'New',         img:'https://images.unsplash.com/photo-1541462608143-67571c6738dd?w=400&q=80' },
-  { id:7,  title:'I will create a social media marketing strategy',           category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:799,  rating:'4.7', review_count:61,  badge:null,          img:'https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=400&q=80' },
-  { id:8,  title:'I will build a mobile app with React Native',               category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:3499, rating:'4.9', review_count:44,  badge:'Top Rated',   img:'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80' },
-  { id:9,  title:'I will write professional technical documentation',         category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:699,  rating:'4.8', review_count:97,  badge:null,          img:'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' },
-  { id:10, title:'I will design brand identity and style guide',              category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:2199, rating:'4.9', review_count:53,  badge:'Popular',     img:'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=400&q=80' },
-  { id:11, title:'I will run Google Ads campaigns and optimize ROI',          category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:1299, rating:'4.6', review_count:38,  badge:null,          img:'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=400&q=80' },
-  { id:12, title:'I will set up a CI/CD pipeline with GitHub Actions',        category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:1799, rating:'4.8', review_count:29,  badge:'New',         img:'https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=400&q=80' },
+  { id:1,  title:'I will build a full-stack web app with React & Django',    category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:2499, rating:'4.9', review_count:48,  badge:'Top Rated',  img:'/images/gig_dev.png' },
+  { id:2,  title:'I will design a modern logo for your brand',                category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:999,  rating:'4.8', review_count:128, badge:'Best Seller', img:'/images/gig_design.png' },
+  { id:3,  title:'I will create a responsive website with React',             category:'Development', seller_name:'Amit Verma',    seller_id:'s3', price:1499, rating:'4.7', review_count:89,  badge:null,          img:'/images/gig_dev.png' },
+  { id:4,  title:'I will write SEO-optimized blog posts for your site',       category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:499,  rating:'4.9', review_count:203, badge:'Popular',     img:'/images/gig_writing.png' },
+  { id:5,  title:'I will build a REST API with Django & PostgreSQL',          category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:1999, rating:'5.0', review_count:32,  badge:null,          img:'/images/gig_dev.png' },
+  { id:6,  title:'I will design a stunning UI/UX for your app',               category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:1499, rating:'4.8', review_count:76,  badge:'New',         img:'/images/gig_design.png' },
+  { id:7,  title:'I will create a social media marketing strategy',           category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:799,  rating:'4.7', review_count:61,  badge:null,          img:'/images/gig_marketing.png' },
+  { id:8,  title:'I will build a mobile app with React Native',               category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:3499, rating:'4.9', review_count:44,  badge:'Top Rated',   img:'/images/gig_mobile.png' },
+  { id:9,  title:'I will write professional technical documentation',         category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:699,  rating:'4.8', review_count:97,  badge:null,          img:'/images/gig_writing.png' },
+  { id:10, title:'I will design brand identity and style guide',              category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:2199, rating:'4.9', review_count:53,  badge:'Popular',     img:'/images/gig_design.png' },
+  { id:11, title:'I will run Google Ads campaigns and optimize ROI',          category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:1299, rating:'4.6', review_count:38,  badge:null,          img:'/images/gig_marketing.png' },
+  { id:12, title:'I will set up a CI/CD pipeline with GitHub Actions',        category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:1799, rating:'4.8', review_count:29,  badge:'New',         img:'/images/gig_devops.png' },
 ]
 
 const CATS = ['All','Development','Design','Writing','Marketing']
@@ -23,17 +24,20 @@ const CATS = ['All','Development','Design','Writing','Marketing']
 function GigCard({ gig }) {
   const navigate = useNavigate()
   return (
-    <div onClick={() => navigate(`/gig/${gig.id}`)} style={{
-      background: 'var(--card)', borderRadius: 14, border: '1px solid var(--border)',
-      overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s',
-    }}
-    onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.12)' }}
-    onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='' }}>
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      whileInView={{ opacity: 1, y: 0 }} 
+      viewport={{ once: true }}
+      whileHover={{ y: -6, boxShadow: '0 20px 40px rgba(0,0,0,0.12)' }}
+      onClick={() => navigate(`/gig/${gig.id}`)} style={{
+        background: 'var(--card)', borderRadius: 16, border: '1px solid var(--border)',
+        overflow: 'hidden', cursor: 'pointer', transition: 'box-shadow 0.2s',
+      }}>
       {/* Thumbnail */}
-      <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
+      <div style={{ height: 170, overflow: 'hidden', position: 'relative' }}>
         {gig.img ? (
           <img src={gig.img} alt={gig.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s' }}
             onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)' }}
           />
         ) : (
@@ -41,42 +45,42 @@ function GigCard({ gig }) {
         )}
         {gig.badge && (
           <span style={{
-            position:'absolute', top:10, left:10,
-            background:'#fff', color:'var(--brand)',
-            fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:6,
-            boxShadow:'0 2px 8px rgba(0,0,0,0.15)'
+            position:'absolute', top:12, left:12,
+            background:'rgba(255,255,255,0.95)', color:'var(--brand)', backdropFilter:'blur(4px)',
+            fontSize:11, fontWeight:700, padding:'4px 10px', borderRadius:20,
+            boxShadow:'0 4px 12px rgba(0,0,0,0.15)'
           }}>{gig.badge}</span>
         )}
       </div>
       {/* Body */}
-      <div style={{ padding: '14px 16px' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+      <div style={{ padding: '16px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
           <div
             onClick={e => { e.stopPropagation(); navigate(`/profile/${gig.seller_id}`) }}
             style={{
-              width:24, height:24, borderRadius:'50%', background:'var(--brand)',
-              color:'#fff', fontSize:9, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center',
+              width:26, height:26, borderRadius:'50%', background:'var(--brand)',
+              color:'#fff', fontSize:10, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center',
               cursor:'pointer', flexShrink: 0
             }}>{gig.seller_name?.slice(0,2).toUpperCase()}</div>
           <span
             onClick={e => { e.stopPropagation(); navigate(`/profile/${gig.seller_id}`) }}
-            style={{ fontSize:12, color:'var(--muted)', cursor:'pointer' }}
+            style={{ fontSize:13, fontWeight:500, color:'var(--muted)', cursor:'pointer' }}
             onMouseEnter={e => e.target.style.color='var(--brand)'}
             onMouseLeave={e => e.target.style.color='var(--muted)'}
           >{gig.seller_name}</span>
         </div>
         <p style={{
-          fontSize:13, fontWeight:500, lineHeight:1.45, marginBottom:12, color:'var(--text)',
+          fontSize:14, fontWeight:600, lineHeight:1.5, marginBottom:14, color:'var(--text)',
           display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden'
         }}>{gig.title}</p>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-          <span className="stars">★ {gig.rating} <span style={{color:'var(--muted)',fontSize:11}}>({gig.review_count})</span></span>
-          <span style={{ fontSize:13, color:'var(--muted)' }}>
-            From <strong style={{ color:'var(--brand)', fontSize:15 }}>₹{Number(gig.price).toLocaleString()}</strong>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid var(--border)', paddingTop:12, marginTop:'auto' }}>
+          <span className="stars">★ {gig.rating} <span style={{color:'var(--muted)',fontSize:12}}>({gig.review_count})</span></span>
+          <span style={{ fontSize:13, color:'var(--muted)', fontWeight:500 }}>
+            From <strong style={{ color:'var(--text)', fontSize:16, fontWeight:800 }}>₹{Number(gig.price).toLocaleString()}</strong>
           </span>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -120,32 +124,32 @@ export default function Home() {
         <div style={{ position:'absolute', bottom:-60, left:-60, width:200, height:200, borderRadius:'50%', background:'rgba(139,92,246,0.2)' }}/>
 
         <div style={{ position:'relative', maxWidth:640, margin:'0 auto' }}>
-          <div className="badge badge-purple" style={{ marginBottom:16, fontSize:12 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="badge badge-purple" style={{ marginBottom:16, fontSize:12, padding: '6px 14px' }}>
             🚀 India's #1 Student Freelance Platform
-          </div>
-          <h1 style={{ color:'#fff', fontSize:'clamp(2rem,5vw,3.2rem)', fontWeight:800, lineHeight:1.3, marginBottom:20 }}>
+          </motion.div>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} style={{ color:'#fff', fontSize:'clamp(2.4rem,6vw,4rem)', fontWeight:800, lineHeight:1.2, marginBottom:24, letterSpacing:'-0.02em' }}>
             Find the perfect<br/>
             <span style={{ color:'#a5b4fc' }}>freelance service</span><br/>
             for your project
-          </h1>
-          <p style={{ color:'rgba(255,255,255,0.7)', fontSize:17, marginBottom:32, lineHeight:1.6 }}>
-            Connect with skilled professionals. Get quality work done fast.
-          </p>
+          </motion.h1>
+          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} style={{ color:'rgba(255,255,255,0.8)', fontSize:18, marginBottom:40, lineHeight:1.6, fontWeight: 400 }}>
+            Connect with top-tier professionals. Get guaranteed quality work done fast and securely.
+          </motion.p>
 
-          <form onSubmit={handleSearch} style={{
-            display:'flex', maxWidth:520, margin:'0 auto',
-            background:'#fff', borderRadius:12, overflow:'hidden',
-            boxShadow:'0 20px 60px rgba(0,0,0,0.3)'
+          <motion.form initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.3 }} onSubmit={handleSearch} style={{
+            display:'flex', maxWidth:560, margin:'0 auto',
+            background:'#fff', borderRadius:16, overflow:'hidden',
+            boxShadow:'0 24px 80px rgba(0,0,0,0.4)', padding: 4
           }}>
             <input
               value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search for any service..."
-              style={{ flex:1, padding:'16px 20px', border:'none', fontSize:15, outline:'none' }}
+              placeholder="Search for any service (e.g. Logo Design)..."
+              style={{ flex:1, padding:'16px 24px', border:'none', fontSize:16, outline:'none' }}
             />
-            <button type="submit" className="btn btn-primary" style={{ borderRadius:0, padding:'0 28px', fontSize:15 }}>
+            <button type="submit" className="btn btn-primary" style={{ borderRadius:12, padding:'0 32px', fontSize:15, fontWeight: 700 }}>
               Search
             </button>
-          </form>
+          </motion.form>
 
           <div style={{ display:'flex', gap:10, justifyContent:'center', marginTop:20, flexWrap:'wrap' }}>
             {['Web Design','Logo Design','React Dev','Django API','SEO Writing'].map(t => (
@@ -215,25 +219,27 @@ export default function Home() {
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background:'var(--card)', padding:'60px 24px', borderTop:'1px solid var(--border)' }}>
+      <div style={{ background:'var(--card)', padding:'80px 24px', borderTop:'1px solid var(--border)' }}>
         <div className="page-wrap">
-          <h2 style={{ textAlign:'center', fontSize:28, fontWeight:800, marginBottom:8, color:'var(--text)' }}>How it works</h2>
-          <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>Get your project done in 3 simple steps</p>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:32 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <h2 style={{ textAlign:'center', fontSize:32, fontWeight:800, marginBottom:12, color:'var(--text)', letterSpacing:'-0.02em' }}>How it works</h2>
+            <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:64, fontSize: 16 }}>Get your project done in 3 simple steps</p>
+          </motion.div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))', gap:40 }}>
             {[
-              { icon:'🔍', title:'Find a service', desc:'Browse hundreds of services or search for exactly what you need' },
-              { icon:'📋', title:'Place an order', desc:'Choose your package, describe your requirements, and pay securely' },
-              { icon:'✅', title:'Get it done', desc:'Receive your work, review it, and approve when satisfied' },
-            ].map(s => (
-              <div key={s.title} style={{ textAlign:'center' }}>
+              { icon:'🔍', title:'Find a service', desc:'Browse hundreds of services or search for exactly what you need with our AI-powered engine' },
+              { icon:'📋', title:'Place an order', desc:'Choose your package, describe your requirements, and pay securely via our guaranteed escrow' },
+              { icon:'✅', title:'Get it done', desc:'Receive your work, review it, and only approve payment when you are 100% satisfied' },
+            ].map((s, i) => (
+              <motion.div key={s.title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} style={{ textAlign:'center' }}>
                 <div style={{
-                  width:60, height:60, borderRadius:'50%', background:'var(--brand-l)',
+                  width:80, height:80, borderRadius:'50%', background:'var(--brand-l)',
                   display:'flex', alignItems:'center', justifyContent:'center',
-                  fontSize:28, margin:'0 auto 16px'
+                  fontSize:36, margin:'0 auto 24px', boxShadow: 'inset 0 4px 12px rgba(99,102,241,0.1)'
                 }}>{s.icon}</div>
-                <h3 style={{ fontSize:16, fontWeight:700, marginBottom:8, color:'var(--text)' }}>{s.title}</h3>
-                <p style={{ fontSize:14, color:'var(--muted)', lineHeight:1.6 }}>{s.desc}</p>
-              </div>
+                <h3 style={{ fontSize:20, fontWeight:800, marginBottom:12, color:'var(--text)' }}>{s.title}</h3>
+                <p style={{ fontSize:15, color:'var(--muted)', lineHeight:1.7 }}>{s.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
