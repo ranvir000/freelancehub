@@ -2,55 +2,67 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../App.jsx'
 
-// ── Mock gigs (shown when backend not connected) ──────────────────────────────
+// ── 12 Mock gigs with real Unsplash images ────────────────────────────────────
 const MOCK = [
-  { id:1, title:'I will build a full-stack web app with React & Django', category:'Development', seller_name:'Ranvir Singh', price:2499, rating:'4.9', review_count:48, badge:'Top Rated' },
-  { id:2, title:'I will design a modern logo for your brand',            category:'Design',      seller_name:'Priya Kapoor', price:999,  rating:'4.8', review_count:128, badge:'Best Seller' },
-  { id:3, title:'I will create a responsive website with React',         category:'Development', seller_name:'Amit Verma',  price:1499, rating:'4.7', review_count:89,  badge:null },
-  { id:4, title:'I will write SEO-optimized blog posts for your site',   category:'Writing',     seller_name:'Sara Liu',    price:499,  rating:'4.9', review_count:203, badge:'Popular' },
-  { id:5, title:'I will build a REST API with Django & PostgreSQL',      category:'Development', seller_name:'Ranvir Singh', price:1999, rating:'5.0', review_count:32,  badge:null },
-  { id:6, title:'I will design a stunning UI/UX for your app',           category:'Design',      seller_name:'Priya Kapoor', price:1499, rating:'4.8', review_count:76,  badge:'New' },
+  { id:1,  title:'I will build a full-stack web app with React & Django',    category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:2499, rating:'4.9', review_count:48,  badge:'Top Rated',  img:'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=400&q=80' },
+  { id:2,  title:'I will design a modern logo for your brand',                category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:999,  rating:'4.8', review_count:128, badge:'Best Seller', img:'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&q=80' },
+  { id:3,  title:'I will create a responsive website with React',             category:'Development', seller_name:'Amit Verma',    seller_id:'s3', price:1499, rating:'4.7', review_count:89,  badge:null,          img:'https://images.unsplash.com/photo-1547658719-da2b51169166?w=400&q=80' },
+  { id:4,  title:'I will write SEO-optimized blog posts for your site',       category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:499,  rating:'4.9', review_count:203, badge:'Popular',     img:'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80' },
+  { id:5,  title:'I will build a REST API with Django & PostgreSQL',          category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:1999, rating:'5.0', review_count:32,  badge:null,          img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&q=80' },
+  { id:6,  title:'I will design a stunning UI/UX for your app',               category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:1499, rating:'4.8', review_count:76,  badge:'New',         img:'https://images.unsplash.com/photo-1541462608143-67571c6738dd?w=400&q=80' },
+  { id:7,  title:'I will create a social media marketing strategy',           category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:799,  rating:'4.7', review_count:61,  badge:null,          img:'https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=400&q=80' },
+  { id:8,  title:'I will build a mobile app with React Native',               category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:3499, rating:'4.9', review_count:44,  badge:'Top Rated',   img:'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80' },
+  { id:9,  title:'I will write professional technical documentation',         category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:699,  rating:'4.8', review_count:97,  badge:null,          img:'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80' },
+  { id:10, title:'I will design brand identity and style guide',              category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:2199, rating:'4.9', review_count:53,  badge:'Popular',     img:'https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=400&q=80' },
+  { id:11, title:'I will run Google Ads campaigns and optimize ROI',          category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:1299, rating:'4.6', review_count:38,  badge:null,          img:'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=400&q=80' },
+  { id:12, title:'I will set up a CI/CD pipeline with GitHub Actions',        category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:1799, rating:'4.8', review_count:29,  badge:'New',         img:'https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=400&q=80' },
 ]
 
 const CATS = ['All','Development','Design','Writing','Marketing']
-const ICONS = { Development:'💻', Design:'🎨', Writing:'✍️', Marketing:'📣', default:'🔧' }
-const COLORS = { Development:'linear-gradient(135deg,#6366f1,#8b5cf6)', Design:'linear-gradient(135deg,#ec4899,#f43f5e)', Writing:'linear-gradient(135deg,#10b981,#059669)', Marketing:'linear-gradient(135deg,#f59e0b,#ef4444)', default:'linear-gradient(135deg,#6366f1,#06b6d4)' }
 
 function GigCard({ gig }) {
   const navigate = useNavigate()
   return (
     <div onClick={() => navigate(`/gig/${gig.id}`)} style={{
-      background: '#fff', borderRadius: 14, border: '1px solid var(--border)',
+      background: 'var(--card)', borderRadius: 14, border: '1px solid var(--border)',
       overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s',
     }}
     onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.12)' }}
     onMouseLeave={e => { e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='' }}>
       {/* Thumbnail */}
-      <div style={{
-        height: 160, background: COLORS[gig.category] || COLORS.default,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 48, position: 'relative'
-      }}>
-        {ICONS[gig.category] || ICONS.default}
+      <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
+        <img src={gig.img} alt={gig.title}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+          onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='linear-gradient(135deg,#6366f1,#8b5cf6)' }}
+        />
         {gig.badge && (
           <span style={{
             position:'absolute', top:10, left:10,
             background:'#fff', color:'var(--brand)',
-            fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:6
+            fontSize:10, fontWeight:700, padding:'3px 8px', borderRadius:6,
+            boxShadow:'0 2px 8px rgba(0,0,0,0.15)'
           }}>{gig.badge}</span>
         )}
       </div>
       {/* Body */}
       <div style={{ padding: '14px 16px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
-          <div style={{
-            width:24, height:24, borderRadius:'50%', background:'var(--brand)',
-            color:'#fff', fontSize:9, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center'
-          }}>{gig.seller_name?.slice(0,2).toUpperCase()}</div>
-          <span style={{ fontSize:12, color:'var(--muted)' }}>{gig.seller_name}</span>
+          <div
+            onClick={e => { e.stopPropagation(); navigate(`/profile/${gig.seller_id}`) }}
+            style={{
+              width:24, height:24, borderRadius:'50%', background:'var(--brand)',
+              color:'#fff', fontSize:9, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center',
+              cursor:'pointer', flexShrink: 0
+            }}>{gig.seller_name?.slice(0,2).toUpperCase()}</div>
+          <span
+            onClick={e => { e.stopPropagation(); navigate(`/profile/${gig.seller_id}`) }}
+            style={{ fontSize:12, color:'var(--muted)', cursor:'pointer' }}
+            onMouseEnter={e => e.target.style.color='var(--brand)'}
+            onMouseLeave={e => e.target.style.color='var(--muted)'}
+          >{gig.seller_name}</span>
         </div>
         <p style={{
-          fontSize:13, fontWeight:500, lineHeight:1.45, marginBottom:12,
+          fontSize:13, fontWeight:500, lineHeight:1.45, marginBottom:12, color:'var(--text)',
           display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden'
         }}>{gig.title}</p>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
@@ -71,7 +83,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  useEffect(() => { fetchGigs() }, [])
   useEffect(() => { fetchGigs() }, [cat])
 
   async function fetchGigs() {
@@ -88,8 +99,6 @@ export default function Home() {
 
   function handleSearch(e) {
     e.preventDefault()
-    const filtered = MOCK.filter(g => g.title.toLowerCase().includes(search.toLowerCase()))
-    setGigs(filtered)
   }
 
   const shown = search
@@ -103,7 +112,6 @@ export default function Home() {
         background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
         padding: '120px 24px 80px', textAlign: 'center', position: 'relative', overflow: 'hidden'
       }}>
-        {/* Background circles */}
         <div style={{ position:'absolute', top:-80, right:-80, width:300, height:300, borderRadius:'50%', background:'rgba(99,102,241,0.2)' }}/>
         <div style={{ position:'absolute', bottom:-60, left:-60, width:200, height:200, borderRadius:'50%', background:'rgba(139,92,246,0.2)' }}/>
 
@@ -120,7 +128,6 @@ export default function Home() {
             Connect with skilled professionals. Get quality work done fast.
           </p>
 
-          {/* Search bar */}
           <form onSubmit={handleSearch} style={{
             display:'flex', maxWidth:520, margin:'0 auto',
             background:'#fff', borderRadius:12, overflow:'hidden',
@@ -136,7 +143,6 @@ export default function Home() {
             </button>
           </form>
 
-          {/* Quick tags */}
           <div style={{ display:'flex', gap:10, justifyContent:'center', marginTop:20, flexWrap:'wrap' }}>
             {['Web Design','Logo Design','React Dev','Django API','SEO Writing'].map(t => (
               <span key={t} onClick={() => setSearch(t)} style={{
@@ -147,7 +153,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Stats */}
           <div style={{ display:'flex', gap:32, justifyContent:'center', marginTop:40 }}>
             {[['500+','Freelancers'],['1200+','Projects Done'],['4.9★','Avg Rating']].map(([n,l]) => (
               <div key={l} style={{ textAlign:'center' }}>
@@ -161,7 +166,7 @@ export default function Home() {
 
       {/* ── CATEGORY PILLS ── */}
       <div style={{
-        background:'#fff', borderBottom:'1px solid var(--border)',
+        background:'var(--nav-bg)', borderBottom:'1px solid var(--border)',
         padding:'0 24px', display:'flex', gap:8, overflowX:'auto'
       }}>
         {CATS.map(c => (
@@ -179,7 +184,7 @@ export default function Home() {
       <div className="page-wrap" style={{ padding:'40px 20px' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24 }}>
           <div>
-            <h2 style={{ fontSize:22, fontWeight:700 }}>
+            <h2 style={{ fontSize:22, fontWeight:700, color:'var(--text)' }}>
               {cat === 'All' ? 'Popular Services' : `${cat} Services`}
             </h2>
             <p style={{ color:'var(--muted)', fontSize:14, marginTop:4 }}>{shown.length} services available</p>
@@ -206,23 +211,23 @@ export default function Home() {
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ background:'#fff', padding:'60px 24px', borderTop:'1px solid var(--border)' }}>
+      <div style={{ background:'var(--card)', padding:'60px 24px', borderTop:'1px solid var(--border)' }}>
         <div className="page-wrap">
-          <h2 style={{ textAlign:'center', fontSize:28, fontWeight:800, marginBottom:8 }}>How it works</h2>
+          <h2 style={{ textAlign:'center', fontSize:28, fontWeight:800, marginBottom:8, color:'var(--text)' }}>How it works</h2>
           <p style={{ textAlign:'center', color:'var(--muted)', marginBottom:48 }}>Get your project done in 3 simple steps</p>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:32 }}>
             {[
-              { n:'1', icon:'🔍', title:'Find a service', desc:'Browse hundreds of services or search for exactly what you need' },
-              { n:'2', icon:'📋', title:'Place an order', desc:'Choose your package, describe your requirements, and pay securely' },
-              { n:'3', icon:'✅', title:'Get it done', desc:'Receive your work, review it, and approve when satisfied' },
+              { icon:'🔍', title:'Find a service', desc:'Browse hundreds of services or search for exactly what you need' },
+              { icon:'📋', title:'Place an order', desc:'Choose your package, describe your requirements, and pay securely' },
+              { icon:'✅', title:'Get it done', desc:'Receive your work, review it, and approve when satisfied' },
             ].map(s => (
-              <div key={s.n} style={{ textAlign:'center' }}>
+              <div key={s.title} style={{ textAlign:'center' }}>
                 <div style={{
                   width:60, height:60, borderRadius:'50%', background:'var(--brand-l)',
                   display:'flex', alignItems:'center', justifyContent:'center',
                   fontSize:28, margin:'0 auto 16px'
                 }}>{s.icon}</div>
-                <h3 style={{ fontSize:16, fontWeight:700, marginBottom:8 }}>{s.title}</h3>
+                <h3 style={{ fontSize:16, fontWeight:700, marginBottom:8, color:'var(--text)' }}>{s.title}</h3>
                 <p style={{ fontSize:14, color:'var(--muted)', lineHeight:1.6 }}>{s.desc}</p>
               </div>
             ))}
