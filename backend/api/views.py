@@ -226,3 +226,32 @@ class AdminOrdersView(APIView):
             'created_at':  o.created_at.strftime('%Y-%m-%d'),
         } for o in orders]
         return Response(data)
+
+
+class ReviewListCreateView(APIView):
+    """
+    GET  /api/reviews/?gig=<id>     → reviews for a gig
+    GET  /api/reviews/?seller=<id>  → reviews for a seller
+    POST /api/reviews/              → submit a review
+    """
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def get(self, request):
+        from api.models import Review
+        from api.serializers import ReviewSerializer
+        qs = Review.objects.select_related('buyer','seller','gig')
+        if request.query_params.get('gig'):
+            qs = qs.filter(gig__id=request.query_params['gig'])
+        if request.query_params.get('seller'):
+            qs = qs.filter(seller__id=request.query_params['seller'])
+        return Response(ReviewSerializer(qs, many=True).data)
+
+    def post(self, request):
+        from api.serializers import ReviewSerializer
+        s = ReviewSerializer(data=request.data, context={'request': request})
+        if s.is_valid():
+            return Response(ReviewSerializer(s.save()).data, status=201)
+        return Response(s.errors, status=400)

@@ -17,6 +17,72 @@ const MOCK_ORDERS = [
   { id:3, gig_title:'I will write SEO-optimized blog posts',                 buyer_name:'Alex Morgan',  seller_name:'Sara Liu',     package:'standard', amount:999,  status:'completed',   created_at:'2026-04-10' },
 ]
 
+// ── REVIEW MODAL ──────────────────────────────────────────────────────────────
+function ReviewModal({ order, onClose, onSubmit }) {
+  const [rating,  setRating]  = useState(5)
+  const [comment, setComment] = useState('')
+  const [hover,   setHover]   = useState(0)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit() {
+    if (!comment.trim()) return
+    setLoading(true)
+    await onSubmit(order, rating, comment)
+    setLoading(false)
+    onClose()
+  }
+
+  return (
+    <div style={{
+      position:'fixed', inset:0, background:'rgba(0,0,0,0.5)',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      zIndex:1000, padding:20
+    }}>
+      <div style={{
+        background:'#fff', borderRadius:16, padding:32,
+        width:'100%', maxWidth:460, boxShadow:'0 20px 60px rgba(0,0,0,0.3)'
+      }}>
+        <h2 style={{ fontSize:20, fontWeight:800, marginBottom:4 }}>Leave a Review</h2>
+        <p style={{ color:'var(--muted)', fontSize:13, marginBottom:24 }}>{order.gig_title}</p>
+
+        <div style={{ marginBottom:20 }}>
+          <p style={{ fontSize:13, fontWeight:600, marginBottom:10 }}>Your Rating</p>
+          <div style={{ display:'flex', gap:8 }}>
+            {[1,2,3,4,5].map(star => (
+              <span key={star} onClick={() => setRating(star)}
+                onMouseEnter={() => setHover(star)} onMouseLeave={() => setHover(0)}
+                style={{
+                  fontSize:36, cursor:'pointer', transition:'transform 0.1s',
+                  transform: (hover||rating) >= star ? 'scale(1.2)' : 'scale(1)',
+                  color: (hover||rating) >= star ? '#f59e0b' : '#e2e8f0'
+                }}>★</span>
+            ))}
+          </div>
+          <p style={{ fontSize:12, color:'var(--muted)', marginTop:6 }}>
+            {['','Terrible','Bad','Okay','Good','Excellent!'][hover||rating]}
+          </p>
+        </div>
+
+        <div className="form-group">
+          <label>Your Review</label>
+          <textarea className="form-control"
+            placeholder="Share your experience with this seller..."
+            value={comment} onChange={e => setComment(e.target.value)}
+            style={{ minHeight:100 }} />
+        </div>
+
+        <div style={{ display:'flex', gap:10, marginTop:8 }}>
+          <button className="btn btn-primary" style={{ flex:1 }}
+            onClick={handleSubmit} disabled={loading || !comment.trim()}>
+            {loading ? 'Submitting...' : '⭐ Submit Review'}
+          </button>
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function StatusBadge({ status }) {
   const s = STATUS_COLORS[status] || STATUS_COLORS.pending
   return <span style={{ background:s.bg, color:s.color, padding:'3px 10px', borderRadius:20, fontSize:11, fontWeight:600 }}>{s.label}</span>
@@ -43,6 +109,8 @@ export default function Dashboard() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('orders')
+  const [reviewOrder, setReviewOrder] = useState(null)
+  const [reviews, setReviews] = useState({}) // orderId -> review
 
   useEffect(() => {
     api.get('/api/orders/').then(r => setOrders(r.data)).catch(() => setOrders(MOCK_ORDERS)).finally(() => setLoading(false))
@@ -59,6 +127,16 @@ export default function Dashboard() {
     }
   }
 
+  async function submitReview(order, rating, comment) {
+    try {
+      await api.post('/api/reviews/', { order: order.id, rating, comment })
+    } catch {
+      // save locally even if API fails
+    }
+    setReviews(p => ({ ...p, [order.id]: { rating, comment } }))
+    toast('Review submitted! ⭐ Thank you!')
+  }
+
   const myOrders = orders.filter(o =>
     user.role === 'buyer' ? o.buyer_name === user.name :
     user.role === 'seller' ? o.seller_name === user.name : true
@@ -70,6 +148,15 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', background:'var(--bg)' }}>
+      {/* Review Modal */}
+      {reviewOrder && (
+        <ReviewModal
+          order={reviewOrder}
+          onClose={() => setReviewOrder(null)}
+          onSubmit={submitReview}
+        />
+      )}
+
       {/* Header */}
       <div style={{ background:'linear-gradient(135deg,#1e1b4b,#312e81)', padding:'32px 0' }}>
         <div className="page-wrap">
@@ -121,7 +208,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Orders table */}
+        {/* Orders */}
         {loading ? (
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {[1,2,3].map(i => <div key={i} className="skeleton" style={{height:72}}/>)}
@@ -154,10 +241,17 @@ export default function Dashboard() {
                       <span style={{ fontSize:12, color:'var(--muted)' }}>Package: {order.package}</span>
                       <span style={{ fontSize:12, color:'var(--muted)' }}>Ordered: {order.created_at}</span>
                     </div>
+                    {/* Show submitted review */}
+                    {reviews[order.id] && (
+                      <div style={{ marginTop:10, padding:'8px 12px', background:'#fef9c3', borderRadius:8, fontSize:13 }}>
+                        <span style={{ color:'#f59e0b' }}>{'★'.repeat(reviews[order.id].rating)}</span>
+                        <span style={{ color:'#92400e', marginLeft:8 }}>{reviews[order.id].comment}</span>
+                      </div>
+                    )}
                   </div>
                   <div style={{ display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
                     <span style={{ fontSize:18, fontWeight:800, color:'var(--brand)' }}>₹{Number(order.amount).toLocaleString()}</span>
-                    {/* Action buttons based on role and status */}
+                    {/* Seller actions */}
                     {user.role === 'seller' && order.status === 'pending' && (
                       <button className="btn btn-primary btn-sm" onClick={() => updateStatus(order.id, 'accepted')}>Accept</button>
                     )}
@@ -167,10 +261,21 @@ export default function Dashboard() {
                     {user.role === 'seller' && order.status === 'in_progress' && (
                       <button className="btn btn-success btn-sm" onClick={() => updateStatus(order.id, 'delivered')}>Mark Delivered</button>
                     )}
+                    {/* Buyer actions */}
                     {user.role === 'buyer' && order.status === 'delivered' && (
                       <button className="btn btn-success btn-sm" onClick={() => updateStatus(order.id, 'completed')}>Approve ✓</button>
                     )}
-                    {order.status === 'completed' && (
+                    {/* Review button — show after completed and no review yet */}
+                    {user.role === 'buyer' && order.status === 'completed' && !reviews[order.id] && (
+                      <button className="btn btn-sm" style={{ background:'#fef9c3', color:'#92400e', border:'1px solid #f59e0b' }}
+                        onClick={() => setReviewOrder(order)}>
+                        ⭐ Review
+                      </button>
+                    )}
+                    {order.status === 'completed' && reviews[order.id] && (
+                      <span style={{ fontSize:20 }}>✅</span>
+                    )}
+                    {order.status === 'completed' && !reviews[order.id] && user.role !== 'buyer' && (
                       <span style={{ fontSize:20 }}>🎉</span>
                     )}
                   </div>

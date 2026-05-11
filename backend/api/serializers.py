@@ -103,3 +103,39 @@ class OrderSerializer(serializers.ModelSerializer):
         validated_data['seller'] = gig.seller
         validated_data['amount'] = validated_data.get('amount') or prices.get(pkg, gig.price_standard)
         return super().create(validated_data)
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    buyer_name  = serializers.ReadOnlyField(source='buyer.name')
+    buyer_initials = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = __import__('api.models', fromlist=['Review']).Review
+        fields = ['id', 'buyer', 'buyer_name', 'buyer_initials', 'seller',
+                  'gig', 'rating', 'comment', 'created_at']
+        read_only_fields = ['id', 'buyer', 'seller', 'gig', 'created_at']
+
+    def get_buyer_initials(self, obj):
+        name = obj.buyer.name
+        parts = name.split()
+        return (parts[0][0] + (parts[1][0] if len(parts)>1 else '')).upper()
+
+    def create(self, validated_data):
+        from api.models import Order
+        order  = Order.objects.get(id=self.context['request'].data.get('order'))
+        buyer  = self.context['request'].user
+        if order.buyer != buyer:
+            raise serializers.ValidationError('Only the buyer can review.')
+        if order.status != 'completed':
+            raise serializers.ValidationError('Order must be completed first.')
+        review = self.Meta.model.objects.create(
+            order=order, buyer=buyer, seller=order.seller, gig=order.gig,
+            rating=validated_data['rating'], comment=validated_data['comment']
+        )
+        # Update gig rating
+        gig     = order.gig
+        reviews = self.Meta.model.objects.filter(gig=gig)
+        gig.rating       = round(sum(r.rating for r in reviews) / reviews.count(), 1)
+        gig.review_count = reviews.count()
+        gig.save()
+        return review

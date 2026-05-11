@@ -26,3 +26,8 @@ urlpatterns = [
     path('admin/gigs/<int:pk>/',  AdminGigsView.as_view()),
     path('admin/orders/',         AdminOrdersView.as_view()),
 ]
+
+from .views import ReviewListCreateView
+urlpatterns += [
+    path('reviews/', ReviewListCreateView.as_view()),
+]
