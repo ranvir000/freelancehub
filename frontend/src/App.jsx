@@ -162,20 +162,23 @@ function Navbar() {
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
                   style={{
-                    position: 'absolute', top: '100%', right: 0, width: 240, marginTop: 8,
-                    background: 'var(--card)', borderRadius: 12, border: '1px solid var(--border)',
-                    boxShadow: 'var(--shadow-md)', overflow: 'hidden', zIndex: 200
+                    position: 'absolute', top: '100%', right: 0, paddingTop: 8, zIndex: 200
                   }}
                 >
-                  <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
-                    <p style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{user.name}</p>
-                    <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{user.email}</p>
-                    <div className="badge badge-purple" style={{ marginTop: 8 }}>{user.role}</div>
-                  </div>
-                  <div style={{ padding: 8 }}>
-                    <div className="dropdown-item" onClick={() => navigate(`/profile/${user.id || 'me'}`)}><User size={16}/> My Profile</div>
-                    <div className="dropdown-item" onClick={() => navigate('/dashboard')}><LayoutDashboard size={16}/> Dashboard</div>
-                    <div className="dropdown-item" style={{ color: 'var(--danger)' }} onClick={() => { logout(); navigate('/') }}><LogOut size={16}/> Sign Out</div>
+                  <div style={{
+                    width: 240, background: 'var(--card)', borderRadius: 12, border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-md)', overflow: 'hidden'
+                  }}>
+                    <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+                      <p style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{user.name}</p>
+                      <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{user.email}</p>
+                      <div className="badge badge-purple" style={{ marginTop: 8 }}>{user.role}</div>
+                    </div>
+                    <div style={{ padding: 8 }}>
+                      <div className="dropdown-item" onClick={() => navigate(`/profile/${user.id || 'me'}`)}><User size={16}/> My Profile</div>
+                      <div className="dropdown-item" onClick={() => navigate('/dashboard')}><LayoutDashboard size={16}/> Dashboard</div>
+                      <div className="dropdown-item" style={{ color: 'var(--danger)' }} onClick={() => { logout(); navigate('/') }}><LogOut size={16}/> Sign Out</div>
+                    </div>
                   </div>
                 </motion.div>
               )}
