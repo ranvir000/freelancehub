@@ -1,20 +1,17 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --brand:    #6366f1;
-  --brand-d:  #4f46e5;
 :root[data-theme="light"] {
-  --bg: #f8fafc;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
   --brand: #6366f1;
   --brand-d: #4f46e5;
   --brand-l: #e0e7ff;
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
   --input-bg: #f8fafc;
   --nav-bg: rgba(255, 255, 255, 0.85);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
