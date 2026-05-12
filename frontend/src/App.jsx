@@ -7,12 +7,85 @@ import './styles/global.css'
 
 // ── API ───────────────────────────────────────────────────────────────────────
 const BASE = import.meta.env.VITE_API_URL || ''
-export const api = axios.create({ baseURL: BASE })
+export const api = axios.create({ baseURL: BASE, timeout: 90000 })
 api.interceptors.request.use(cfg => {
   const t = localStorage.getItem('fh_token')
   if (t) cfg.headers.Authorization = `Bearer ${t}`
   return cfg
 })
+
+// ── Server Status Context ─────────────────────────────────────────────────────
+const ServerCtx = createContext({ status: 'unknown' })
+export function useServerStatus() { return useContext(ServerCtx) }
+
+function ServerStatusProvider({ children }) {
+  // 'checking' | 'warming' | 'ready' | 'unknown'
+  const [status, setStatus] = useState('checking')
+  const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    let warmingTimer
+    // Quick probe — if it doesn't respond in 3s, server is cold-starting
+    const quickProbe = axios.create({ baseURL: BASE, timeout: 3000 })
+    quickProbe.get('/api/auth/me/').then(() => {
+      setStatus('ready')
+    }).catch((err) => {
+      if (err.code === 'ERR_NETWORK' || err.code === 'ECONNABORTED' || (err.response?.status !== 401 && err.response?.status !== 403)) {
+        // Server didn't respond quickly — it's cold-starting
+        setStatus('warming')
+        // Now do a real probe with full timeout to know when it's ready
+        api.get('/api/auth/me/').then(() => {
+          setStatus('ready')
+        }).catch(() => {
+          setStatus('ready') // Even if auth fails, server is up
+        })
+      } else {
+        // Got a 401/403 = server is up, just not authenticated
+        setStatus('ready')
+      }
+    })
+    return () => clearTimeout(warmingTimer)
+  }, [])
+
+  const showBanner = (status === 'checking' || status === 'warming') && !dismissed
+
+  return (
+    <ServerCtx.Provider value={{ status }}>
+      {children}
+      <AnimatePresence>
+        {showBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -60 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
+              background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+              color: '#fff', padding: '10px 20px',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              fontSize: 14, fontWeight: 600, boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+              gap: 12,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18, animation: 'spin 1.5s linear infinite', display: 'inline-block' }}>⏳</span>
+              <span>
+                {status === 'checking' ? 'Connecting to server…' : '🥶 Server is waking up — this takes ~30 seconds on first visit. Please wait…'}
+              </span>
+            </div>
+            <button
+              onClick={() => setDismissed(true)}
+              style={{ background: 'rgba(255,255,255,0.25)', border: 'none', color: '#fff', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </ServerCtx.Provider>
+  )
+}
 
 // ── Theme Context ─────────────────────────────────────────────────────────────
 const ThemeCtx = createContext(null)
@@ -375,18 +448,17 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/auth/me/`).catch(() => {})
-  }, [])
   return (
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
-          <BrowserRouter>
-            <Navbar />
-            <AnimatedRoutes />
-            <ChatWidget />
-          </BrowserRouter>
+          <ServerStatusProvider>
+            <BrowserRouter>
+              <Navbar />
+              <AnimatedRoutes />
+              <ChatWidget />
+            </BrowserRouter>
+          </ServerStatusProvider>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>

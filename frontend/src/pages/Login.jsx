@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { api, useAuth, useToast } from '../App.jsx'
+import { api, useAuth, useToast, useServerStatus } from '../App.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
 
 function AuthLayout({ children, title, sub }) {
@@ -39,6 +39,8 @@ export function Login() {
   const { login } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
+  const { status: serverStatus } = useServerStatus()
+  const isWarming = serverStatus === 'warming' || serverStatus === 'checking'
 
   async function handle(e) {
     e.preventDefault()
@@ -49,12 +51,34 @@ export function Login() {
       toast('Welcome back! 👋')
       navigate('/dashboard')
     } catch (err) {
-      toast(err.response?.data?.message || 'Invalid email or password', 'error')
+      toast(err.response?.data?.message || 'Invalid email or password. Try again.', 'error')
     } finally { setLoading(false) }
   }
 
   return (
     <AuthLayout title="Welcome back" sub="Sign in to your FreelanceHub account">
+
+      {/* Cold-start notice */}
+      <AnimatePresence>
+        {isWarming && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{
+              background: '#fef3c7', border: '1px solid #f59e0b',
+              borderRadius: 10, padding: '10px 14px', marginBottom: 16,
+              fontSize: 13, color: '#92400e', display: 'flex', gap: 8, alignItems: 'flex-start'
+            }}
+          >
+            <span style={{ fontSize: 16, flexShrink: 0 }}>⏳</span>
+            <span>
+              <strong>Server is starting up.</strong> This can take ~30 seconds on the first visit.
+              You can submit the form — it will sign you in once the server is ready.
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <form onSubmit={handle}>
         <div className="form-group">
@@ -67,8 +91,15 @@ export function Login() {
           <input className="form-control" type="password" placeholder="••••••••"
             value={form.password} onChange={e => setForm(p=>({...p,password:e.target.value}))} required />
         </div>
-        <button className="btn btn-primary" style={{width:'100%', marginTop:8}} disabled={loading}>
-          {loading ? <><span className="spinner"/>Signing in...</> : 'Sign In'}
+        <button
+          className="btn btn-primary"
+          style={{ width:'100%', marginTop:8, opacity: isWarming && !loading ? 0.85 : 1 }}
+          disabled={loading}
+        >
+          {loading
+            ? <><span className="spinner"/>{isWarming ? 'Waiting for server…' : 'Signing in…'}</>
+            : isWarming ? '⏳ Sign In (Server Starting…)' : 'Sign In'
+          }
         </button>
       </form>
 

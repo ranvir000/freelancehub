@@ -16,6 +16,8 @@
   --nav-bg: rgba(255, 255, 255, 0.85);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --radius: 12px;
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.3);
 }
@@ -36,6 +38,8 @@
   --nav-bg: rgba(19, 27, 47, 0.85);
   --shadow-sm: 0 4px 12px rgba(0,0,0,0.3);
   --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow: 0 4px 12px rgba(0,0,0,0.3);
+  --radius: 12px;
   --glass-bg: rgba(19, 27, 47, 0.6);
   --glass-border: rgba(255, 255, 255, 0.05);
 }
