@@ -17,6 +17,9 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-freelancehub-local-de
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# Always allow Render domains
+if '.onrender.com' not in ' '.join(ALLOWED_HOSTS):
+    ALLOWED_HOSTS += ['.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
