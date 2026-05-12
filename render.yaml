@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: freelancehub-backend
+    env: python
+    rootDir: backend
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn freelancehub.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "freelancehub-backend.onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://freelancehub.vercel.app,http://localhost:5173"
+      - key: DEBUG
+        value: "False"

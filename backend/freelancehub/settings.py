@@ -5,6 +5,7 @@
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
+import dj_database_url
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,19 +61,16 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'freelancehub.wsgi.application'
 
-# Database: SQLite locally, PostgreSQL on Render
+# Database: SQLite locally, PostgreSQL on Render/Supabase
 DATABASE_URL = config('DATABASE_URL', default='')
 if DATABASE_URL:
-    import urllib.parse as urlparse
-    url = urlparse.urlparse(DATABASE_URL)
-    DATABASES = {'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     url.path[1:],
-        'USER':     url.username,
-        'PASSWORD': url.password,
-        'HOST':     url.hostname,
-        'PORT':     url.port,
-    }}
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
 else:
     DATABASES = {'default': {
         'ENGINE': 'django.db.backends.sqlite3',
