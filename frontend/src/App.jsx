@@ -375,6 +375,9 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/auth/me/`).catch(() => {})
+  }, [])
   return (
     <ThemeProvider>
       <AuthProvider>
