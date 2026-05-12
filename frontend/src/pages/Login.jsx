@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, useAuth, useToast } from '../App.jsx'
-import { useGoogleLogin } from '@react-oauth/google'
-import { jwtDecode } from 'jwt-decode'
-import axios from 'axios'
 
 function AuthLayout({ children, title, sub }) {
   return (
@@ -55,53 +52,8 @@ export function Login() {
     } finally { setLoading(false) }
   }
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        // Fetch user info using the access token
-        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        })
-        const data = userInfo.data
-        const googleUser = {
-          id: data.sub, name: data.name, email: data.email, role: 'buyer',
-          avatar: data.picture || 'https://lh3.googleusercontent.com/a/default-user'
-        }
-        login(googleUser, tokenResponse.access_token)
-        toast('Signed in with Google ✓')
-        navigate('/dashboard')
-      } catch (err) {
-        toast('Failed to fetch Google profile', 'error')
-      }
-    },
-    onError: () => toast('Google Sign-In Failed', 'error')
-  })
-
-  function handleGoogle() {
-    googleLogin()
-  }
-
   return (
     <AuthLayout title="Welcome back" sub="Sign in to your FreelanceHub account">
-      {/* Google button */}
-      <button onClick={handleGoogle} style={{
-        width:'100%', padding:'11px 16px', borderRadius:8,
-        border:'1.5px solid var(--border)', background:'var(--card)',
-        display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-        fontSize:14, fontWeight:600, color:'var(--text)', cursor:'pointer',
-        marginBottom:20, transition:'all 0.15s'
-      }}
-      onMouseEnter={e => e.currentTarget.style.borderColor='var(--brand)'}
-      onMouseLeave={e => e.currentTarget.style.borderColor='var(--border)'}
-      >
-        <GoogleIcon /> Continue with Google
-      </button>
-
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
-        <div style={{ flex:1, height:1, background:'var(--border)' }}/>
-        <span style={{ fontSize:12, color:'var(--muted)', whiteSpace:'nowrap' }}>or sign in with email</span>
-        <div style={{ flex:1, height:1, background:'var(--border)' }}/>
-      </div>
 
       <form onSubmit={handle}>
         <div className="form-group">
@@ -160,51 +112,8 @@ export function Register() {
     } finally { setLoading(false) }
   }
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        })
-        const data = userInfo.data
-        const googleUser = {
-          id: data.sub, name: data.name, email: data.email, role: form.role,
-          avatar: data.picture || 'https://lh3.googleusercontent.com/a/default-user'
-        }
-        login(googleUser, tokenResponse.access_token)
-        toast('Signed up with Google ✓')
-        navigate('/dashboard')
-      } catch (err) {
-        toast('Failed to fetch Google profile', 'error')
-      }
-    },
-    onError: () => toast('Google Sign-In Failed', 'error')
-  })
-
-  function handleGoogle() {
-    googleLogin()
-  }
-
   return (
     <AuthLayout title="Join FreelanceHub" sub="Create your account and get started today">
-      <button onClick={handleGoogle} style={{
-        width:'100%', padding:'11px 16px', borderRadius:8,
-        border:'1.5px solid var(--border)', background:'var(--card)',
-        display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-        fontSize:14, fontWeight:600, color:'var(--text)', cursor:'pointer',
-        marginBottom:20, transition:'all 0.15s'
-      }}
-      onMouseEnter={e => e.currentTarget.style.borderColor='var(--brand)'}
-      onMouseLeave={e => e.currentTarget.style.borderColor='var(--border)'}
-      >
-        <GoogleIcon /> Continue with Google
-      </button>
-
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
-        <div style={{ flex:1, height:1, background:'var(--border)' }}/>
-        <span style={{ fontSize:12, color:'var(--muted)', whiteSpace:'nowrap' }}>or create with email</span>
-        <div style={{ flex:1, height:1, background:'var(--border)' }}/>
-      </div>
 
       <form onSubmit={handle}>
         <div className="form-group">

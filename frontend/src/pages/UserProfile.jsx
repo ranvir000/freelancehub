@@ -101,12 +101,13 @@ export default function UserProfile() {
   )
 
   const isOwnProfile = currentUser && (id === 'me' || id === currentUser.id?.toString())
-  const initials = profile.name?.slice(0,2).toUpperCase() || '??'
+  const displayName = profile.name || profile.username || (profile.first_name ? `${profile.first_name} ${profile.last_name}` : 'Anonymous User')
+  const initials = displayName.slice(0,2).toUpperCase() || '??'
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', background:'var(--bg)' }}>
       {/* Cover */}
-      <div style={{ height:160, background:'linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)', position:'relative' }}>
+      <div style={{ height:180, background:'linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)', position:'relative' }}>
         {isOwnProfile && (
           <div style={{ position:'absolute', top:16, right:16 }}>
             <button className="btn btn-ghost btn-sm" style={{ background:'rgba(255,255,255,0.15)', color:'#fff', border:'1px solid rgba(255,255,255,0.3)' }}>
@@ -118,29 +119,38 @@ export default function UserProfile() {
 
       <div className="page-wrap" style={{ padding:'0 20px 40px' }}>
         {/* Avatar row */}
-        <div style={{ display:'flex', alignItems:'flex-end', gap:20, marginTop:-40, marginBottom:24, flexWrap:'wrap' }}>
-          {profile.img ? (
-            <img src={profile.img} alt={profile.name} style={{ width:80, height:80, borderRadius:'50%', border:'4px solid var(--bg)', objectFit:'cover', flexShrink:0 }}
-                 onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex' }} />
-          ) : null}
-          <div style={{
-            display: profile.img ? 'none' : 'flex',
-            width:80, height:80, borderRadius:'50%', background:'var(--brand)',
-            color:'#fff', alignItems:'center', justifyContent:'center',
-            fontSize:28, fontWeight:800, border:'4px solid var(--bg)', flexShrink:0
-          }}>{initials}</div>
+        <div style={{ display:'flex', alignItems:'flex-end', gap:24, marginTop:-50, marginBottom:24, flexWrap:'wrap' }}>
+          <div style={{ position:'relative' }}>
+            {profile.img ? (
+              <img src={profile.img} alt={displayName} style={{ width:100, height:100, borderRadius:'50%', border:'4px solid var(--bg)', objectFit:'cover', flexShrink:0 }}
+                   onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex' }} />
+            ) : null}
+            <div style={{
+              display: profile.img ? 'none' : 'flex',
+              width:100, height:100, borderRadius:'50%', background:'var(--brand)',
+              color:'#fff', alignItems:'center', justifyContent:'center',
+              fontSize:32, fontWeight:800, border:'4px solid var(--bg)', flexShrink:0
+            }}>{initials}</div>
+            {/* Online Indicator */}
+            <div style={{
+              position:'absolute', bottom:6, right:6, width:16, height:16,
+              background:'var(--success)', borderRadius:'50%', border:'3px solid var(--bg)',
+              boxShadow:'0 0 0 2px rgba(34,197,94,0.2)'
+            }} title="Online Now"></div>
+          </div>
           <div style={{ paddingBottom:8, flex:1 }}>
-            <h1 style={{ fontSize:22, fontWeight:800, color:'var(--text)', marginBottom:4 }}>{profile.name}</h1>
+            <h1 style={{ fontSize:26, fontWeight:800, color:'var(--text)', marginBottom:6 }}>{displayName}</h1>
             <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
               <span className="badge badge-purple" style={{ textTransform:'capitalize' }}>{profile.role}</span>
-              {profile.location && <span style={{ fontSize:13, color:'var(--muted)' }}>📍 {profile.location}</span>}
-              {profile.joinedDate && <span style={{ fontSize:13, color:'var(--muted)' }}>🗓 Joined {profile.joinedDate}</span>}
+              {profile.location && <span style={{ fontSize:14, color:'var(--muted)' }}>📍 {profile.location}</span>}
+              {profile.joinedDate && <span style={{ fontSize:14, color:'var(--muted)' }}>🗓 Joined {profile.joinedDate}</span>}
             </div>
           </div>
           {!isOwnProfile && profile.role === 'seller' && (
-            <button className="btn btn-primary" onClick={() => navigate('/')}>
-              View Gigs
-            </button>
+            <div style={{ display:'flex', gap:12 }}>
+              <button className="btn btn-outline" onClick={() => {}}>✉️ Message</button>
+              <button className="btn btn-primary" onClick={() => navigate('/')}>View Gigs</button>
+            </div>
           )}
         </div>
 
@@ -249,17 +259,17 @@ export default function UserProfile() {
             {/* Stats */}
             {profile.role === 'seller' && (
               <div className="card" style={{ padding:20 }}>
-                <h3 style={{ fontSize:14, fontWeight:700, marginBottom:16, color:'var(--text)' }}>Stats</h3>
+                <h3 style={{ fontSize:16, fontWeight:700, marginBottom:16, color:'var(--text)' }}>Stats</h3>
                 <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
                   {[
                     { icon:'⭐', label:'Rating', value: profile.rating ? `${profile.rating}/5.0` : 'No ratings yet' },
                     { icon:'✅', label:'Orders Done', value: profile.completedOrders || 0 },
-                    { icon:'💬', label:'Reviews', value: profile.reviewCount || 0 },
+                    { icon:'⚡', label:'Avg. Response', value: '1 hr' },
                     { icon:'🗓', label:'Member Since', value: profile.joinedDate || 'Recently' },
                   ].map(s => (
-                    <div key={s.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 0', borderBottom:'1px solid var(--border)' }}>
-                      <span style={{ fontSize:13, color:'var(--muted)' }}>{s.icon} {s.label}</span>
-                      <span style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>{s.value}</span>
+                    <div key={s.label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 0', borderBottom:'1px solid var(--border)' }}>
+                      <span style={{ fontSize:14, color:'var(--muted)', display:'flex', alignItems:'center', gap:8 }}>{s.icon} {s.label}</span>
+                      <span style={{ fontSize:14, fontWeight:700, color:'var(--text)' }}>{s.value}</span>
                     </div>
                   ))}
                 </div>
