@@ -85,36 +85,40 @@ function GigCard({ gig }) {
 }
 
 export default function Home() {
-  const [gigs, setGigs]     = useState([])
+  const [gigs, setGigs]     = useState(MOCK)
   const [cat, setCat]       = useState('All')
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { fetchGigs() }, [cat])
 
   async function fetchGigs() {
-    setLoading(true)
+    // Show mock data immediately (already set), fetch real data in background
+    const mockFiltered = cat === 'All' ? MOCK : MOCK.filter(g => g.category === cat)
+    setGigs(mockFiltered)
+
     try {
       const params = {}
       if (cat !== 'All') params.category = cat
       const res = await api.get('/api/gigs/', { params })
-      let fetched = res.data.length ? res.data : MOCK.filter(g => cat === 'All' || g.category === cat)
-      fetched = fetched.map(g => {
-        if (!g.img || g.img.includes('unsplash.com')) {
-          const c = g.category?.toLowerCase() || ''
-          if (c.includes('dev')) g.img = '/images/gig_dev.png'
-          else if (c.includes('design')) g.img = '/images/gig_design.png'
-          else if (c.includes('writ')) g.img = '/images/gig_writing.png'
-          else if (c.includes('market')) g.img = '/images/gig_marketing.png'
-          else g.img = '/images/gig_dev.png'
-        }
-        return g
-      })
-      setGigs(fetched)
+      if (res.data.length) {
+        let fetched = res.data.map(g => {
+          if (!g.img || g.img.includes('unsplash.com')) {
+            const c = g.category?.toLowerCase() || ''
+            if (c.includes('dev')) g.img = '/images/gig_dev.png'
+            else if (c.includes('design')) g.img = '/images/gig_design.png'
+            else if (c.includes('writ')) g.img = '/images/gig_writing.png'
+            else if (c.includes('market')) g.img = '/images/gig_marketing.png'
+            else g.img = '/images/gig_dev.png'
+          }
+          return g
+        })
+        setGigs(fetched)
+      }
     } catch {
-      setGigs(cat === 'All' ? MOCK : MOCK.filter(g => g.category === cat))
-    } finally { setLoading(false) }
+      // API failed — keep showing mock data (already displayed)
+    }
   }
 
   function handleSearch(e) {
