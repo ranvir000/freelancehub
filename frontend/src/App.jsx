@@ -262,6 +262,99 @@ import PostGig   from './pages/PostGig.jsx'
 import AdminPanel from './pages/AdminPanel.jsx'
 import UserProfile from './pages/UserProfile.jsx'
 
+// ── Chat Widget ───────────────────────────────────────────────────────────────
+function ChatWidget() {
+  const { user } = useAuth()
+  const [open, setOpen] = useState(false)
+  const [msgs, setMsgs] = useState([])
+  const [input, setInput] = useState('')
+
+  if (!user) return null
+
+  const handleSend = (e) => {
+    e.preventDefault()
+    if(!input.trim()) return
+    setMsgs([...msgs, {text:input, isUser:true}])
+    setInput('')
+    setTimeout(() => {
+      setMsgs(p => [...p, {text:"Thanks for reaching out! A support agent will be with you shortly.", isUser:false}])
+    }, 1000)
+  }
+
+  return (
+    <>
+      <div 
+        onClick={() => setOpen(!open)}
+        style={{
+          position:'fixed', bottom:24, right:24, width:60, height:60, borderRadius:'50%',
+          background:'var(--brand)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center',
+          boxShadow:'0 10px 24px rgba(99,102,241,0.4)', cursor:'pointer', zIndex:1000,
+          fontSize:26, transition:'transform 0.2s'
+        }}
+        onMouseEnter={e=>e.currentTarget.style.transform='scale(1.05)'}
+        onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+      >
+        {open ? '✕' : '💬'}
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity:0, y:20, scale:0.9, originY:1, originX:1 }}
+            animate={{ opacity:1, y:0, scale:1 }}
+            exit={{ opacity:0, y:20, scale:0.9 }}
+            transition={{ duration:0.2 }}
+            style={{
+              position:'fixed', bottom:96, right:24, width:340, height:480,
+              background:'var(--card)', borderRadius:16, border:'1px solid var(--border)',
+              boxShadow:'0 24px 48px rgba(0,0,0,0.2)', zIndex:1000,
+              display:'flex', flexDirection:'column', overflow:'hidden'
+            }}
+          >
+            {/* Header */}
+            <div style={{ background:'linear-gradient(135deg,var(--brand),var(--brand-d))', padding:'16px', color:'#fff', display:'flex', alignItems:'center', gap:12 }}>
+              <div style={{ position:'relative' }}>
+                <div style={{ width:40, height:40, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:14 }}>FH</div>
+                <div style={{ position:'absolute', bottom:0, right:0, width:12, height:12, background:'var(--success)', borderRadius:'50%', border:'2px solid var(--brand-d)' }}/>
+              </div>
+              <div>
+                <p style={{ fontWeight:700, fontSize:15, marginBottom:2 }}>Support Team</p>
+                <p style={{ fontSize:12, color:'rgba(255,255,255,0.8)' }}>Typically replies instantly</p>
+              </div>
+            </div>
+            {/* Body */}
+            <div style={{ flex:1, padding:16, background:'var(--bg)', overflowY:'auto', display:'flex', flexDirection:'column', gap:12 }}>
+              <div style={{ textAlign:'center', fontSize:12, color:'var(--muted)', margin:'4px 0' }}>Today</div>
+              <div style={{ background:'var(--card)', padding:'10px 14px', borderRadius:'14px 14px 14px 4px', border:'1px solid var(--border)', alignSelf:'flex-start', maxWidth:'85%', fontSize:14, color:'var(--text)', boxShadow:'var(--shadow-sm)' }}>
+                Hi {user.name?.split(' ')[0]}! 👋 How can we help you today?
+              </div>
+              {msgs.map((m, i) => (
+                <div key={i} style={{ 
+                  background: m.isUser ? 'var(--brand)' : 'var(--card)', 
+                  color: m.isUser ? '#fff' : 'var(--text)',
+                  padding:'10px 14px', borderRadius: m.isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
+                  border: m.isUser ? 'none' : '1px solid var(--border)',
+                  alignSelf: m.isUser ? 'flex-end' : 'flex-start', 
+                  maxWidth:'85%', fontSize:14, boxShadow:'var(--shadow-sm)' 
+                }}>
+                  {m.text}
+                </div>
+              ))}
+            </div>
+            {/* Input */}
+            <form onSubmit={handleSend} style={{ padding:16, borderTop:'1px solid var(--border)', background:'var(--card)', display:'flex', gap:8 }}>
+              <input value={input} onChange={e=>setInput(e.target.value)} placeholder="Type a message..." style={{ flex:1, padding:'10px 16px', borderRadius:24, border:'1px solid var(--border)', outline:'none', background:'var(--input-bg)', color:'var(--text)', fontSize:14 }} />
+              <button type="submit" disabled={!input.trim()} style={{ width:40, height:40, borderRadius:'50%', background: input.trim() ? 'var(--brand)' : 'var(--border)', color:'#fff', border:'none', display:'flex', alignItems:'center', justifyContent:'center', cursor: input.trim() ? 'pointer' : 'default', transition:'background 0.2s' }}>
+                <span style={{transform:'rotate(90deg) translateX(2px)'}}>▲</span>
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
 // ── Page Transitions Wrapper ──────────────────────────────────────────────────
 function AnimatedRoutes() {
   const loc = useLocation()
@@ -289,6 +382,7 @@ export default function App() {
           <BrowserRouter>
             <Navbar />
             <AnimatedRoutes />
+            <ChatWidget />
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>

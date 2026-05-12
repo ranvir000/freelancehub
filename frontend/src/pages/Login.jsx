@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api, useAuth, useToast } from '../App.jsx'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function AuthLayout({ children, title, sub }) {
   return (
@@ -79,30 +80,33 @@ export function Login() {
 }
 
 export function Register() {
-  const [form, setForm] = useState({ name:'', email:'', password:'', role:'buyer' })
+  const [step, setStep] = useState(1)
+  const [form, setForm] = useState({ name:'', email:'', password:'', role:'buyer', bio:'', skills:'' })
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
 
   async function handle(e) {
-    e.preventDefault()
+    if (e) e.preventDefault()
     setLoading(true)
     try {
-      const res = await api.post('/api/auth/register/', form)
+      const payload = { ...form }
+      if (form.skills) payload.skills = form.skills.split(',').map(s=>s.trim())
+      const res = await api.post('/api/auth/register/', payload)
       login(res.data.user, res.data.token)
       toast('Account created! Welcome 🎉')
       navigate('/dashboard')
     } catch {
-      // Demo mode — create account locally with a proper id
+      // Demo mode
       const newUser = {
         id: 'u_' + Date.now(),
         name: form.name,
         email: form.email,
         role: form.role,
         joinedDate: new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
-        bio: '',
-        skills: [],
+        bio: form.bio || '',
+        skills: form.skills ? form.skills.split(',').map(s=>s.trim()) : [],
         completedOrders: 0,
         rating: null
       }
@@ -112,48 +116,131 @@ export function Register() {
     } finally { setLoading(false) }
   }
 
-  return (
-    <AuthLayout title="Join FreelanceHub" sub="Create your account and get started today">
+  const nextStep = (e) => {
+    e.preventDefault()
+    if (step === 1 && (!form.name || !form.email || !form.password)) {
+      toast('Please fill all fields', 'error')
+      return
+    }
+    if (step === 2 && !form.role) return
+    setStep(s => s + 1)
+  }
 
-      <form onSubmit={handle}>
-        <div className="form-group">
-          <label>Full name</label>
-          <input className="form-control" placeholder="Ranvir Singh"
-            value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} required />
+  const prevStep = () => setStep(s => s - 1)
+
+  return (
+    <div style={{
+      minHeight:'calc(100vh - 64px)', display:'flex', alignItems:'center',
+      justifyContent:'center', background:'var(--bg)', padding:24
+    }}>
+      <div style={{ width:'100%', maxWidth:460 }}>
+        {/* Progress Bar */}
+        <div style={{ display:'flex', gap:8, marginBottom:32, justifyContent:'center' }}>
+          {[1,2,3].map(i => (
+            <div key={i} style={{
+              height:4, width:40, borderRadius:2,
+              background: i <= step ? 'var(--brand)' : 'var(--border)',
+              transition:'background 0.3s'
+            }} />
+          ))}
         </div>
-        <div className="form-group">
-          <label>Email address</label>
-          <input className="form-control" type="email" placeholder="you@example.com"
-            value={form.email} onChange={e => setForm(p=>({...p,email:e.target.value}))} required />
+
+        <div className="card" style={{ padding:40, overflow:'hidden', position:'relative', minHeight:420 }}>
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div key="step1" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <div style={{ textAlign:'center', marginBottom:24 }}>
+                  <div style={{ fontSize:36, marginBottom:12 }}>👋</div>
+                  <h1 style={{ fontSize:22, fontWeight:800, color:'var(--text)' }}>Create an account</h1>
+                  <p style={{ color:'var(--muted)', fontSize:14 }}>Join the FreelanceHub community</p>
+                </div>
+                <form onSubmit={nextStep}>
+                  <div className="form-group">
+                    <label>Full name</label>
+                    <input className="form-control" placeholder="Ranvir Singh" value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Email address</label>
+                    <input className="form-control" type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm(p=>({...p,email:e.target.value}))} required />
+                  </div>
+                  <div className="form-group">
+                    <label>Password</label>
+                    <input className="form-control" type="password" placeholder="Min. 8 characters" value={form.password} onChange={e => setForm(p=>({...p,password:e.target.value}))} required minLength={8} />
+                  </div>
+                  <button type="submit" className="btn btn-primary" style={{width:'100%', marginTop:16}}>Continue ➔</button>
+                </form>
+                <p style={{ textAlign:'center', fontSize:13, color:'var(--muted)', marginTop:20 }}>
+                  Have an account? <Link to="/login" style={{color:'var(--brand)',fontWeight:600}}>Sign in</Link>
+                </p>
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div key="step2" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <div style={{ textAlign:'center', marginBottom:24 }}>
+                  <div style={{ fontSize:36, marginBottom:12 }}>🎯</div>
+                  <h1 style={{ fontSize:22, fontWeight:800, color:'var(--text)' }}>What brings you here?</h1>
+                  <p style={{ color:'var(--muted)', fontSize:14 }}>Select how you want to use the platform</p>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                  {[
+                    ['buyer','🛒','Hire Talent','I want to find professionals for my projects'],
+                    ['seller','💼','Offer Services','I want to sell my skills and get hired']
+                  ].map(([v,icon,label,desc]) => (
+                    <div key={v} onClick={() => setForm(p=>({...p,role:v}))} style={{
+                      padding:20, borderRadius:12, border: form.role===v ? '2px solid var(--brand)' : '1.5px solid var(--border)',
+                      background: form.role===v ? 'var(--brand-l)' : 'var(--input-bg)',
+                      cursor:'pointer', transition:'all 0.15s', display:'flex', alignItems:'center', gap:16
+                    }}>
+                      <div style={{fontSize:32}}>{icon}</div>
+                      <div>
+                        <div style={{fontSize:16,fontWeight:700,color:form.role===v?'var(--brand)':'var(--text)',marginBottom:4}}>{label}</div>
+                        <div style={{fontSize:13,color:form.role===v?'var(--brand)':'var(--muted)'}}>{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display:'flex', gap:12, marginTop:24 }}>
+                  <button className="btn btn-ghost" onClick={prevStep}>Back</button>
+                  <button className="btn btn-primary" style={{flex:1}} onClick={() => {
+                    if(form.role === 'buyer') handle() // Skip step 3 for buyers
+                    else nextStep({preventDefault:()=>{}})
+                  }}>
+                    {form.role === 'buyer' ? (loading ? 'Creating...' : 'Create Account ✓') : 'Continue ➔'}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div key="step3" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>
+                <div style={{ textAlign:'center', marginBottom:24 }}>
+                  <div style={{ fontSize:36, marginBottom:12 }}>⭐</div>
+                  <h1 style={{ fontSize:22, fontWeight:800, color:'var(--text)' }}>Build your profile</h1>
+                  <p style={{ color:'var(--muted)', fontSize:14 }}>Stand out to potential clients</p>
+                </div>
+                <form onSubmit={handle}>
+                  <div className="form-group">
+                    <label>Professional Bio (Optional)</label>
+                    <textarea className="form-control" placeholder="I am a full-stack developer with 3 years of experience..." value={form.bio} onChange={e => setForm(p=>({...p,bio:e.target.value}))} style={{minHeight:80}} />
+                  </div>
+                  <div className="form-group">
+                    <label>Skills (Comma separated, Optional)</label>
+                    <input className="form-control" placeholder="React, Node.js, Design" value={form.skills} onChange={e => setForm(p=>({...p,skills:e.target.value}))} />
+                  </div>
+                  <div style={{ display:'flex', gap:12, marginTop:24 }}>
+                    <button type="button" className="btn btn-ghost" onClick={prevStep}>Back</button>
+                    <button type="submit" className="btn btn-primary" style={{flex:1}} disabled={loading}>
+                      {loading ? <><span className="spinner"/>Finishing...</> : 'Complete Profile ✓'}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input className="form-control" type="password" placeholder="Min. 8 characters"
-            value={form.password} onChange={e => setForm(p=>({...p,password:e.target.value}))} required minLength={8} />
-        </div>
-        <div className="form-group">
-          <label>I want to</label>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-            {[['buyer','🛒','Hire talent'],['seller','💼','Offer services']].map(([v,icon,label]) => (
-              <div key={v} onClick={() => setForm(p=>({...p,role:v}))} style={{
-                padding:12, borderRadius:8, border: form.role===v ? '2px solid var(--brand)' : '1.5px solid var(--border)',
-                background: form.role===v ? 'var(--brand-l)' : 'var(--input-bg)',
-                cursor:'pointer', textAlign:'center', transition:'all 0.15s'
-              }}>
-                <div style={{fontSize:20,marginBottom:4}}>{icon}</div>
-                <div style={{fontSize:13,fontWeight:600,color:form.role===v?'var(--brand)':'var(--text)'}}>{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <button className="btn btn-primary" style={{width:'100%', marginTop:8}} disabled={loading}>
-          {loading ? <><span className="spinner"/>Creating account...</> : 'Create Account'}
-        </button>
-      </form>
-      <p style={{ textAlign:'center', fontSize:13, color:'var(--muted)', marginTop:20 }}>
-        Have an account? <Link to="/login" style={{color:'var(--brand)',fontWeight:600}}>Sign in</Link>
-      </p>
-    </AuthLayout>
+      </div>
+    </div>
   )
 }
 
