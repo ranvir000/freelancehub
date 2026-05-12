@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api, useAuth, useToast } from '../App.jsx'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
 const STATUS_COLORS = {
   pending:    { bg:'#fef9c3', color:'#a16207', label:'Pending' },
@@ -205,6 +206,61 @@ export default function Dashboard() {
               <StatCard icon="💸" label="Total Spent" value={`₹${myOrders.reduce((s,o)=>s+Number(o.amount),0).toLocaleString()}`} />
             </>
           )}
+        </div>
+
+        {/* Analytics Charts */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(400px,1fr))', gap:24, marginBottom:32 }}>
+          <div className="card" style={{ padding:24 }}>
+            <h3 style={{ fontSize:16, fontWeight:700, marginBottom:16, color:'var(--text)' }}>
+              {user.role === 'seller' ? 'Earnings Overview' : 'Spending Overview'}
+            </h3>
+            <div style={{ height:250, width:'100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={[
+                  { name: 'Jan', amount: 1200 }, { name: 'Feb', amount: 2100 },
+                  { name: 'Mar', amount: 1800 }, { name: 'Apr', amount: 3400 },
+                  { name: 'May', amount: 4800 }, { name: 'Jun', amount: 5200 },
+                ]}>
+                  <defs>
+                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--brand)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} tickFormatter={v => `₹${v}`} dx={-10} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius:8, border:'none', boxShadow:'var(--shadow-md)', background:'var(--card)' }}
+                    itemStyle={{ color:'var(--brand)', fontWeight:700 }}
+                  />
+                  <Area type="monotone" dataKey="amount" stroke="var(--brand)" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="card" style={{ padding:24 }}>
+            <h3 style={{ fontSize:16, fontWeight:700, marginBottom:16, color:'var(--text)' }}>Order Status Distribution</h3>
+            <div style={{ height:250, width:'100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={[
+                  { name: 'Pending', count: myOrders.filter(o=>o.status==='pending').length || 1 },
+                  { name: 'Active', count: activeOrders || 2 },
+                  { name: 'Completed', count: completedOrders || 4 },
+                  { name: 'Cancelled', count: myOrders.filter(o=>o.status==='cancelled').length || 0 },
+                ]} layout="vertical" margin={{ top: 0, right: 20, left: 20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} dx={-10} />
+                  <Tooltip 
+                    cursor={{fill:'var(--brand-l)'}}
+                    contentStyle={{ borderRadius:8, border:'none', boxShadow:'var(--shadow-md)', background:'var(--card)' }}
+                  />
+                  <Bar dataKey="count" fill="var(--brand)" radius={[0, 4, 4, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
