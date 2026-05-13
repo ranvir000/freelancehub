@@ -128,22 +128,9 @@ export function Register() {
       login(res.data.user, res.data.token)
       toast('Account created! Welcome 🎉')
       navigate('/dashboard')
-    } catch {
-      // Demo mode
-      const newUser = {
-        id: 'u_' + Date.now(),
-        name: form.name,
-        email: form.email,
-        role: form.role,
-        joinedDate: new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }),
-        bio: form.bio || '',
-        skills: form.skills ? form.skills.split(',').map(s=>s.trim()) : [],
-        completedOrders: 0,
-        rating: null
-      }
-      login(newUser, 'demo-token-' + Date.now())
-      toast('Account created! Welcome 🎉')
-      navigate('/dashboard')
+    } catch (err) {
+      console.error(err)
+      toast(err.response?.data?.message || 'Registration failed. Check console or CORS.', 'error')
     } finally { setLoading(false) }
   }
 

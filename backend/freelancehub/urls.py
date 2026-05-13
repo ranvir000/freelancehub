@@ -21,12 +21,12 @@ def seed_database(request):
     created_users = {}
     for u in USERS:
         pw = u.pop('password')
-        if not User.objects.filter(email=u['email']).exists():
+        if not User.objects.filter(email__iexact=u['email']).exists():
             user = User.objects.create_user(password=pw, **u)
             created_users[u['username']] = user
             results.append(f"Created user: {user.name} ({user.role})")
         else:
-            created_users[u['username']] = User.objects.get(email=u['email'])
+            created_users[u['username']] = User.objects.get(email__iexact=u['email'])
             results.append(f"Skipped (exists): {u['email']}")
 
     # Create gigs
