@@ -244,10 +244,10 @@ export default function Dashboard() {
             <div style={{ height:250, width:'100%' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { name: 'Pending', count: myOrders.filter(o=>o.status==='pending').length || 1 },
-                  { name: 'Active', count: activeOrders || 2 },
-                  { name: 'Completed', count: completedOrders || 4 },
-                  { name: 'Cancelled', count: myOrders.filter(o=>o.status==='cancelled').length || 0 },
+                  { name: 'Pending', count: myOrders.filter(o=>o.status==='pending').length },
+                  { name: 'Active', count: activeOrders },
+                  { name: 'Completed', count: completedOrders },
+                  { name: 'Cancelled', count: myOrders.filter(o=>o.status==='cancelled').length },
                 ]} layout="vertical" margin={{ top: 0, right: 20, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                   <XAxis type="number" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} />

@@ -102,7 +102,7 @@ export default function UserProfile() {
 
   const isOwnProfile = currentUser && (id === 'me' || id === currentUser.id?.toString())
   const displayName = profile.name || profile.username || (profile.first_name ? `${profile.first_name} ${profile.last_name}` : 'Anonymous User')
-  const initials = displayName.slice(0,2).toUpperCase() || '??'
+  const initials = displayName.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase() || '??'
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', background:'var(--bg)' }}>
@@ -142,6 +142,7 @@ export default function UserProfile() {
             <h1 style={{ fontSize:26, fontWeight:800, color:'var(--text)', marginBottom:6 }}>{displayName}</h1>
             <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
               <span className="badge badge-purple" style={{ textTransform:'capitalize' }}>{profile.role}</span>
+              {profile.email && <span style={{ fontSize:14, color:'var(--muted)' }}>📧 {profile.email}</span>}
               {profile.location && <span style={{ fontSize:14, color:'var(--muted)' }}>📍 {profile.location}</span>}
               {profile.joinedDate && <span style={{ fontSize:14, color:'var(--muted)' }}>🗓 Joined {profile.joinedDate}</span>}
             </div>
