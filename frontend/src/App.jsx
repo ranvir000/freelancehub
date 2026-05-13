@@ -14,6 +14,50 @@ api.interceptors.request.use(cfg => {
   return cfg
 })
 
+// ── Image Helper ──────────────────────────────────────────────────────────────
+export function getGigImage(gig) {
+  if (gig.img && !gig.img.includes('unsplash.com') && !gig.img.includes('picsum.photos')) return gig.img;
+  
+  const idStr = String(gig.id || '1');
+  let idNum = 0;
+  for(let i=0; i<idStr.length; i++) idNum += idStr.charCodeAt(i);
+  
+  const c = (gig.category || 'Development').toLowerCase();
+  
+  const imgs = {
+    development: [
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=400&q=80',
+    ],
+    design: [
+      'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1509343256512-d77a5cb3791b?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=400&q=80',
+    ],
+    writing: [
+      'https://images.unsplash.com/photo-1455390582262-044cdead27d8?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1516414447565-b14be0adf13e?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1456406644174-8ddd4cd52a06?auto=format&fit=crop&w=400&q=80',
+    ],
+    marketing: [
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=400&q=80',
+      'https://images.unsplash.com/photo-1533750516457-a7f992034fec?auto=format&fit=crop&w=400&q=80',
+    ]
+  };
+  
+  let list = imgs[c] || imgs.development;
+  return list[idNum % list.length];
+}
+
+
 // ── Server Status Context ─────────────────────────────────────────────────────
 const ServerCtx = createContext({ status: 'unknown' })
 export function useServerStatus() { return useContext(ServerCtx) }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api, useAuth, useToast } from '../App.jsx'
+import { api, useAuth, useToast, getGigImage } from '../App.jsx'
 
 const MOCK = {
   1:{ id:1, title:'I will build a full-stack web app with React & Django', category:'Development', seller_name:'Ranvir Singh', seller_id:'s1', seller_bio:'Final-year B.Tech CSE. Expert in React, Django, PostgreSQL.', rating:'4.9', review_count:48, orders_completed:48, img:'https://picsum.photos/seed/g1/400/300', description:`Complete web application with:\n• User authentication (JWT)\n• REST API with Django\n• PostgreSQL database\n• Responsive React frontend\n• Admin panel\n• Source code + documentation`, price_basic:2499, price_standard:4999, price_premium:8999, delivery_basic:7, delivery_standard:14, delivery_premium:21, reviews:[{name:'Alex M.',rating:5,text:'Outstanding! Delivered ahead of schedule.',date:'2 days ago'},{name:'Neha S.',rating:5,text:'Excellent code quality. Highly recommend!',date:'1 week ago'}] },
@@ -17,6 +17,7 @@ const MOCK = {
   12:{ id:12, title:'I will set up a CI/CD pipeline with GitHub Actions', category:'Development', seller_name:'Arjun Patel', seller_id:'s6', seller_bio:'Cross-platform mobile developer (iOS & Android).', rating:'4.8', review_count:29, orders_completed:29, img:'https://picsum.photos/seed/g12/400/300', description:`CI/CD Pipeline Setup:\n• Automated testing\n• Linting checks\n• Docker integration\n• Automated deployment (Vercel/AWS)\n• Workflow optimization`, price_basic:1799, price_standard:2999, price_premium:4999, delivery_basic:4, delivery_standard:7, delivery_premium:10, reviews:[{name:'SaaS Builder.',rating:5,text:'Deployments are now completely automated. Huge time saver.',date:'2 weeks ago'}] },
 
 }
+Object.keys(MOCK).forEach(k => { MOCK[k].img = getGigImage(MOCK[k]) })
 
 export default function GigDetail() {
   const { id } = useParams()
@@ -32,9 +33,7 @@ export default function GigDetail() {
   useEffect(() => {
     api.get(`/api/gigs/${id}/`).then(r => {
       let g = r.data;
-      if (!g.img || g.img.includes('unsplash.com')) {
-        g.img = `https://picsum.photos/seed/${g.id}/400/300`;
-      }
+      g.img = getGigImage(g);
       setGig(g);
     }).catch(() => setGig(MOCK[id] || MOCK[1]))
   }, [id])

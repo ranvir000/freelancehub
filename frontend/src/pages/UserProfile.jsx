@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api, useAuth } from '../App.jsx'
+import { api, useAuth, getGigImage } from '../App.jsx'
 
 // Mock sellers
 const MOCK_SELLERS = {
@@ -13,18 +13,18 @@ const MOCK_SELLERS = {
 }
 
 const MOCK_GIGS = {
-  1:'Full-stack web app with React & Django',
-  2:'Modern logo for your brand',
-  3:'Responsive website with React',
-  4:'SEO-optimized blog posts',
-  5:'REST API with Django & PostgreSQL',
-  6:'Stunning UI/UX for your app',
-  7:'Social media marketing strategy',
-  8:'Mobile app with React Native',
-  9:'Professional technical documentation',
-  10:'Brand identity and style guide',
-  11:'Google Ads campaigns & ROI',
-  12:'CI/CD pipeline with GitHub Actions',
+  1: { title:'Full-stack web app with React & Django', category:'Development' },
+  2: { title:'Modern logo for your brand', category:'Design' },
+  3: { title:'Responsive website with React', category:'Development' },
+  4: { title:'SEO-optimized blog posts', category:'Writing' },
+  5: { title:'REST API with Django & PostgreSQL', category:'Development' },
+  6: { title:'Stunning UI/UX for your app', category:'Design' },
+  7: { title:'Social media marketing strategy', category:'Marketing' },
+  8: { title:'Mobile app with React Native', category:'Development' },
+  9: { title:'Professional technical documentation', category:'Writing' },
+  10: { title:'Brand identity and style guide', category:'Design' },
+  11: { title:'Google Ads campaigns & ROI', category:'Marketing' },
+  12: { title:'CI/CD pipeline with GitHub Actions', category:'Development' },
 }
 
 const GIG_IMAGES = {
@@ -199,11 +199,11 @@ export default function UserProfile() {
                     >
                       <div style={{
                         width:80, height:60, borderRadius:8, flexShrink:0,
-                        background: `url(https://picsum.photos/seed/${gigId}/400/300) center/cover`,
+                        background: `url(${getGigImage({id: gigId, category: MOCK_GIGS[gigId]?.category})}) center/cover`,
                         backgroundColor: 'var(--brand-l)', border:'1px solid var(--border)'
                       }} />
                       <p style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>
-                        {MOCK_GIGS[gigId] || `Gig #${gigId}`}
+                        {MOCK_GIGS[gigId]?.title || `Gig #${gigId}`}
                       </p>
                     </div>
                   ))}
