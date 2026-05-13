@@ -12,12 +12,12 @@ print("🌱 Seeding FreelanceHub database...")
 
 # Users
 USERS = [
-    dict(username='ranvir',  first_name='Ranvir', last_name='Singh',  email='ranvir@demo.com',  role='seller', password='demo1234'),
-    dict(username='priya',   first_name='Priya',  last_name='Kapoor', email='priya@demo.com',   role='seller', password='demo1234'),
-    dict(username='sara',    first_name='Sara',   last_name='Liu',    email='sara@demo.com',    role='seller', password='demo1234'),
-    dict(username='alex',    first_name='Alex',   last_name='Morgan', email='alex@demo.com',    role='buyer',  password='demo1234'),
-    dict(username='james',   first_name='James',  last_name='Taylor', email='james@demo.com',   role='buyer',  password='demo1234'),
-    dict(username='admin',   first_name='Admin',  last_name='User',   email='admin@demo.com',   role='admin',  password='admin1234'),
+    dict(username='ranvir',  first_name='Ranvir', last_name='Singh',  email='ranvir@gmail.com',  role='seller', password='demo1234'),
+    dict(username='priya',   first_name='Priya',  last_name='Kapoor', email='priya@gmail.com',   role='seller', password='demo1234'),
+    dict(username='sara',    first_name='Sara',   last_name='Liu',    email='sara@gmail.com',    role='seller', password='demo1234'),
+    dict(username='alex',    first_name='Alex',   last_name='Morgan', email='alex@gmail.com',    role='buyer',  password='demo1234'),
+    dict(username='james',   first_name='James',  last_name='Taylor', email='james@gmail.com',   role='buyer',  password='demo1234'),
+    dict(username='admin',   first_name='Admin',  last_name='User',   email='admin@gmail.com',   role='admin',  password='admin1234'),
 ]
 
 created = {}

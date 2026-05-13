@@ -18,7 +18,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = User
-        fields = ['name', 'email', 'password', 'role']
+        fields = ['name', 'email', 'password', 'role', 'bio']
 
     def create(self, validated_data):
         name  = validated_data.pop('name', '')
@@ -30,6 +30,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             first_name = parts[0],
             last_name  = parts[1] if len(parts) > 1 else '',
             role       = validated_data.get('role', 'buyer'),
+            bio        = validated_data.get('bio', ''),
         )
         return user
 

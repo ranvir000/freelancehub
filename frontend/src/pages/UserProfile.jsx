@@ -119,7 +119,7 @@ export default function UserProfile() {
 
       <div className="page-wrap" style={{ padding:'0 20px 40px' }}>
         {/* Avatar row */}
-        <div style={{ display:'flex', alignItems:'flex-end', gap:24, marginTop:-50, marginBottom:24, flexWrap:'wrap' }}>
+        <div style={{ position:'relative', zIndex:10, display:'flex', alignItems:'flex-end', gap:24, marginTop:-50, marginBottom:24, flexWrap:'wrap' }}>
           <div style={{ position:'relative' }}>
             {profile.img ? (
               <img src={profile.img} alt={displayName} style={{ width:100, height:100, borderRadius:'50%', border:'4px solid var(--bg)', objectFit:'cover', flexShrink:0 }}
@@ -199,7 +199,7 @@ export default function UserProfile() {
                     >
                       <div style={{
                         width:80, height:60, borderRadius:8, flexShrink:0,
-                        background: `url(${GIG_IMAGES[gigId] || ''}) center/cover`,
+                        background: `url(https://picsum.photos/seed/${gigId}/400/300) center/cover`,
                         backgroundColor: 'var(--brand-l)', border:'1px solid var(--border)'
                       }} />
                       <p style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>

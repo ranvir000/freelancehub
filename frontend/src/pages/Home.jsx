@@ -5,18 +5,19 @@ import { api } from '../App.jsx'
 
 // ── 12 Mock gigs with local premium images ────────────────────────────────────
 const MOCK = [
-  { id:1,  title:'I will build a full-stack web app with React & Django',    category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:2499, rating:'4.9', review_count:48,  badge:'Top Rated',  img:'/images/gig_dev.png' },
-  { id:2,  title:'I will design a modern logo for your brand',                category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:999,  rating:'4.8', review_count:128, badge:'Best Seller', img:'/images/gig_design.png' },
-  { id:3,  title:'I will create a responsive website with React',             category:'Development', seller_name:'Amit Verma',    seller_id:'s3', price:1499, rating:'4.7', review_count:89,  badge:null,          img:'/images/gig_dev.png' },
-  { id:4,  title:'I will write SEO-optimized blog posts for your site',       category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:499,  rating:'4.9', review_count:203, badge:'Popular',     img:'/images/gig_writing.png' },
-  { id:5,  title:'I will build a REST API with Django & PostgreSQL',          category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:1999, rating:'5.0', review_count:32,  badge:null,          img:'/images/gig_dev.png' },
-  { id:6,  title:'I will design a stunning UI/UX for your app',               category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:1499, rating:'4.8', review_count:76,  badge:'New',         img:'/images/gig_design.png' },
-  { id:7,  title:'I will create a social media marketing strategy',           category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:799,  rating:'4.7', review_count:61,  badge:null,          img:'/images/gig_marketing.png' },
-  { id:8,  title:'I will build a mobile app with React Native',               category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:3499, rating:'4.9', review_count:44,  badge:'Top Rated',   img:'/images/gig_mobile.png' },
-  { id:9,  title:'I will write professional technical documentation',         category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:699,  rating:'4.8', review_count:97,  badge:null,          img:'/images/gig_writing.png' },
-  { id:10, title:'I will design brand identity and style guide',              category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:2199, rating:'4.9', review_count:53,  badge:'Popular',     img:'/images/gig_design.png' },
-  { id:11, title:'I will run Google Ads campaigns and optimize ROI',          category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:1299, rating:'4.6', review_count:38,  badge:null,          img:'/images/gig_marketing.png' },
-  { id:12, title:'I will set up a CI/CD pipeline with GitHub Actions',        category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:1799, rating:'4.8', review_count:29,  badge:'New',         img:'/images/gig_devops.png' },
+  { id:1,  title:'I will build a full-stack web app with React & Django',    category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:2499, rating:'4.9', review_count:48,  badge:'Top Rated',  img:'https://picsum.photos/seed/g1/400/300' },
+  { id:2,  title:'I will design a modern logo for your brand',                category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:999,  rating:'4.8', review_count:128, badge:'Best Seller', img:'https://picsum.photos/seed/g2/400/300' },
+  { id:3,  title:'I will create a responsive website with React',             category:'Development', seller_name:'Amit Verma',    seller_id:'s3', price:1499, rating:'4.7', review_count:89,  badge:null,          img:'https://picsum.photos/seed/g3/400/300' },
+  { id:4,  title:'I will write SEO-optimized blog posts for your site',       category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:499,  rating:'4.9', review_count:203, badge:'Popular',     img:'https://picsum.photos/seed/g4/400/300' },
+  { id:5,  title:'I will build a REST API with Django & PostgreSQL',          category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:1999, rating:'5.0', review_count:32,  badge:null,          img:'https://picsum.photos/seed/g5/400/300' },
+  { id:6,  title:'I will design a stunning UI/UX for your app',               category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:1499, rating:'4.8', review_count:76,  badge:'New',         img:'https://picsum.photos/seed/g6/400/300' },
+  { id:7,  title:'I will create a social media marketing strategy',           category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:799,  rating:'4.7', review_count:61,  badge:null,          img:'https://picsum.photos/seed/g7/400/300' },
+  { id:8,  title:'I will build a mobile app with React Native',               category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:3499, rating:'4.9', review_count:44,  badge:'Top Rated',   img:'https://picsum.photos/seed/g8/400/300' },
+  { id:9,  title:'I will write professional technical documentation',         category:'Writing',     seller_name:'Sara Liu',      seller_id:'s4', price:699,  rating:'4.8', review_count:97,  badge:null,          img:'https://picsum.photos/seed/g9/400/300' },
+  { id:10, title:'I will design brand identity and style guide',              category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:2199, rating:'4.9', review_count:53,  badge:'Popular',     img:'https://picsum.photos/seed/g10/400/300' },
+  { id:11, title:'I will run Google Ads campaigns and optimize ROI',          category:'Marketing',   seller_name:'Kiran Mehta',   seller_id:'s5', price:1299, rating:'4.6', review_count:38,  badge:null,          img:'https://picsum.photos/seed/g11/400/300' },
+  { id:12, title:'I will set up a CI/CD pipeline with GitHub Actions',        category:'Development', seller_name:'Arjun Patel',   seller_id:'s6', price:1799, rating:'4.8', review_count:29,  badge:'New',         img:'https://picsum.photos/seed/g12/400/300' },
+
 ]
 
 const CATS = ['All','Development','Design','Writing','Marketing']
@@ -105,12 +106,7 @@ export default function Home() {
       if (res.data.length) {
         let fetched = res.data.map(g => {
           if (!g.img || g.img.includes('unsplash.com')) {
-            const c = g.category?.toLowerCase() || ''
-            if (c.includes('dev')) g.img = '/images/gig_dev.png'
-            else if (c.includes('design')) g.img = '/images/gig_design.png'
-            else if (c.includes('writ')) g.img = '/images/gig_writing.png'
-            else if (c.includes('market')) g.img = '/images/gig_marketing.png'
-            else g.img = '/images/gig_dev.png'
+            g.img = `https://picsum.photos/seed/${g.id}/400/300`
           }
           return g
         })
