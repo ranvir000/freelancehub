@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { api, getGigImage } from '../App.jsx'
 
-// ── 12 Mock gigs with local premium images ───────────const MOCK = [
+// ── 12 Mock gigs with local premium images ────────────────────────────────────
+const MOCK = [
   { id:1,  title:'I will build a full-stack web app with React & Django',    category:'Development', seller_name:'Ranvir Singh',  seller_id:'s1', price:2499, rating:'4.9', review_count:48,  badge:'Top Rated' },
   { id:2,  title:'I will design a modern logo for your brand',                category:'Design',      seller_name:'Neha Sharma',   seller_id:'s2', price:999,  rating:'4.8', review_count:128, badge:'Best Seller' },
   { id:3,  title:'I will create a responsive website with React',             category:'Development', seller_name:'Amit Verma',    seller_id:'s3', price:1499, rating:'4.7', review_count:89,  badge:null },
