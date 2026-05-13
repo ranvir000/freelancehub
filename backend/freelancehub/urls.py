@@ -24,13 +24,19 @@ def seed_database(request):
     created_users = {}
     for u in USERS:
         pw = u.pop('password')
-        if not User.objects.filter(email__iexact=u['email']).exists():
+        try:
+            user = User.objects.get(username=u['username'])
+            if user.email != u['email']:
+                user.email = u['email']
+                user.save()
+                results.append(f"Updated email for: {u['username']}")
+            else:
+                results.append(f"Skipped (exists): {u['username']}")
+            created_users[u['username']] = user
+        except User.DoesNotExist:
             user = User.objects.create_user(password=pw, **u)
             created_users[u['username']] = user
             results.append(f"Created user: {user.name} ({user.role})")
-        else:
-            created_users[u['username']] = User.objects.get(email__iexact=u['email'])
-            results.append(f"Skipped (exists): {u['email']}")
 
     # Create gigs
     if all(k in created_users for k in ['ranvir', 'priya', 'sara', 'amit', 'kiran', 'arjun']):
