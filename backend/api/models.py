@@ -1,20 +1,16 @@
-# models.py — Only 3 models. Simple and clean.
-# User, Gig, Order. That's it.
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class User(AbstractUser):
-    """
-    Extended user with role field.
-    role = buyer  → places orders
-    role = seller → posts gigs, receives orders
-    role = admin  → sees admin panel
-    """
+    """Extended user with role, skills, location, avatar."""
     ROLES = [('buyer','Buyer'), ('seller','Seller'), ('admin','Admin')]
     role           = models.CharField(max_length=10, choices=ROLES, default='buyer')
     bio            = models.TextField(blank=True, default='')
+    skills         = models.TextField(blank=True, default='')   # comma-separated
+    location       = models.CharField(max_length=100, blank=True, default='')
+    avatar_url     = models.URLField(blank=True, default='')
+    hourly_rate    = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     total_earnings = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     class Meta:
@@ -26,6 +22,10 @@ class User(AbstractUser):
     @property
     def name(self):
         return self.get_full_name() or self.username
+
+    @property
+    def skills_list(self):
+        return [s.strip() for s in self.skills.split(',') if s.strip()] if self.skills else []
 
 
 class Gig(models.Model):
@@ -41,7 +41,6 @@ class Gig(models.Model):
     description = models.TextField()
     category    = models.CharField(max_length=50, choices=CATEGORIES, default='Development')
 
-    # Three price tiers
     price_basic    = models.DecimalField(max_digits=8, decimal_places=2)
     price_standard = models.DecimalField(max_digits=8, decimal_places=2)
     price_premium  = models.DecimalField(max_digits=8, decimal_places=2)
@@ -50,11 +49,10 @@ class Gig(models.Model):
     delivery_standard = models.IntegerField(default=14)
     delivery_premium  = models.IntegerField(default=21)
 
-    # Stats
-    rating            = models.DecimalField(max_digits=3, decimal_places=1, default=5.0)
-    review_count      = models.IntegerField(default=0)
-    orders_completed  = models.IntegerField(default=0)
-    is_active         = models.BooleanField(default=True)
+    rating           = models.DecimalField(max_digits=3, decimal_places=1, default=5.0)
+    review_count     = models.IntegerField(default=0)
+    orders_completed = models.IntegerField(default=0)
+    is_active        = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -131,3 +129,33 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.buyer.name} → {self.seller.name}: {self.rating}★"
+
+
+class Message(models.Model):
+    """Direct message between two users, optionally linked to an order."""
+    sender   = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    order    = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True, related_name='messages')
+    content  = models.TextField()
+    is_read  = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.sender.name} → {self.receiver.name}: {self.content[:40]}'
+
+
+class Favourite(models.Model):
+    """A buyer's saved/bookmarked gig."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favourites')
+    gig  = models.ForeignKey(Gig,  on_delete=models.CASCADE, related_name='favourited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'gig')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.name} ❤ {self.gig.title[:40]}'

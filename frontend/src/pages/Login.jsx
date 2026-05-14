@@ -49,7 +49,8 @@ export function Login() {
       const res = await api.post('/api/auth/login/', form)
       login(res.data.user, res.data.token)
       toast('Welcome back! 👋')
-      navigate('/dashboard')
+      const role = res.data.user?.role
+      navigate(role === 'seller' ? '/seller/dashboard' : role === 'admin' ? '/admin/dashboard' : '/client/dashboard')
     } catch (err) {
       toast(err.response?.data?.message || 'Invalid email or password. Try again.', 'error')
     } finally { setLoading(false) }
@@ -129,7 +130,8 @@ export function Register() {
       const res = await api.post('/api/auth/register/', payload)
       login(res.data.user, res.data.token)
       toast('Account created! Welcome 🎉')
-      navigate('/dashboard')
+      const role = res.data.user?.role
+      navigate(role === 'seller' ? '/seller/dashboard' : '/client/dashboard')
     } catch (err) {
       console.error(err)
       toast(err.response?.data?.message || 'Registration failed. Check console or CORS.', 'error')

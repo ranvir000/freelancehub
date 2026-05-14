@@ -229,33 +229,26 @@ function Navbar() {
   const mutedColor = isHome ? 'rgba(255,255,255,0.75)' : 'var(--muted)'
   const borderColor = isHome ? 'rgba(255,255,255,0.3)' : 'var(--border)'
 
+  const dashPath = user?.role === 'seller' ? '/seller/dashboard' : user?.role === 'admin' ? '/admin/dashboard' : '/client/dashboard'
+
   const NavLinks = ({ mobile }) => (
     <>
       {user ? (
         <>
-          <Link to="/dashboard" onClick={() => setMenuOpen(false)}>
+          <Link to="/browse" onClick={() => setMenuOpen(false)}>
+            <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
+              color: mobile ? 'var(--text)' : mutedColor,
+              borderColor: mobile ? 'var(--border)' : borderColor,
+              width: mobile ? '100%' : undefined
+            }}>Browse</button>
+          </Link>
+          <Link to={dashPath} onClick={() => setMenuOpen(false)}>
             <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
               color: mobile ? 'var(--text)' : mutedColor,
               borderColor: mobile ? 'var(--border)' : borderColor,
               width: mobile ? '100%' : undefined
             }}>Dashboard</button>
           </Link>
-          {user.role === 'seller' && (
-            <Link to="/post-gig" onClick={() => setMenuOpen(false)}>
-              <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
-                color: mobile ? 'var(--text)' : mutedColor,
-                borderColor: mobile ? 'var(--border)' : borderColor,
-                width: mobile ? '100%' : undefined
-              }}>Post a Gig</button>
-            </Link>
-          )}
-          {user.role === 'admin' && (
-            <Link to="/admin" onClick={() => setMenuOpen(false)}>
-              <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
-                width: mobile ? '100%' : undefined
-              }}>Admin</button>
-            </Link>
-          )}
           {/* Dynamic Profile Dropdown */}
           <div style={{ position: 'relative' }} onMouseEnter={() => setProfileOpen(true)} onMouseLeave={() => setProfileOpen(false)}>
             <div style={{
@@ -291,7 +284,7 @@ function Navbar() {
                     </div>
                     <div style={{ padding: 8 }}>
                       <div className="dropdown-item" onClick={() => navigate(`/profile/${user.id || 'me'}`)}><User size={16}/> My Profile</div>
-                      <div className="dropdown-item" onClick={() => navigate('/dashboard')}><LayoutDashboard size={16}/> Dashboard</div>
+                      <div className="dropdown-item" onClick={() => navigate(dashPath)}><LayoutDashboard size={16}/> Dashboard</div>
                       <div className="dropdown-item" style={{ color: 'var(--danger)' }} onClick={() => { logout(); navigate('/') }}><LogOut size={16}/> Sign Out</div>
                     </div>
                   </div>
@@ -309,6 +302,15 @@ function Navbar() {
         </>
       ) : (
         <>
+          {[['Browse','/browse'],['Categories','/categories'],['Find Talent','/sellers'],['About','/about']].map(([label, path]) => (
+            <Link key={path} to={path} onClick={() => setMenuOpen(false)}>
+              <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
+                color: mobile ? 'var(--text)' : mutedColor,
+                borderColor: mobile ? 'var(--border)' : borderColor,
+                width: mobile ? '100%' : undefined
+              }}>{label}</button>
+            </Link>
+          ))}
           <Link to="/login" onClick={() => setMenuOpen(false)}>
             <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
               color: mobile ? 'var(--text)' : mutedColor,
@@ -368,14 +370,42 @@ function Navbar() {
 }
 
 // ── Pages ─────────────────────────────────────────────────────────────────────
-import Home      from './pages/Home.jsx'
-import Login     from './pages/Login.jsx'
-import Register  from './pages/Register.jsx'
-import GigDetail from './pages/GigDetail.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import PostGig   from './pages/PostGig.jsx'
-import AdminPanel from './pages/AdminPanel.jsx'
+import Home        from './pages/Home.jsx'
+import Browse      from './pages/Browse.jsx'
+import Categories  from './pages/Categories.jsx'
+import Sellers     from './pages/Sellers.jsx'
+import About       from './pages/About.jsx'
+import Login       from './pages/Login.jsx'
+import Register    from './pages/Register.jsx'
+import GigDetail   from './pages/GigDetail.jsx'
 import UserProfile from './pages/UserProfile.jsx'
+
+// Layouts
+import ClientLayout from './layouts/ClientLayout.jsx'
+import SellerLayout from './layouts/SellerLayout.jsx'
+import AdminLayout  from './layouts/AdminLayout.jsx'
+
+// Client pages
+import ClientDashboard  from './pages/client/Dashboard.jsx'
+import ClientOrders     from './pages/client/Orders.jsx'
+import ClientMessages   from './pages/client/Messages.jsx'
+import ClientFavourites from './pages/client/Favourites.jsx'
+import ClientSettings   from './pages/client/Settings.jsx'
+
+// Seller pages
+import SellerDashboard from './pages/seller/Dashboard.jsx'
+import SellerGigs      from './pages/seller/Gigs.jsx'
+import SellerPostGig   from './pages/seller/PostGig.jsx'
+import SellerOrders    from './pages/seller/Orders.jsx'
+import SellerEarnings  from './pages/seller/Earnings.jsx'
+import SellerMessages  from './pages/seller/Messages.jsx'
+import SellerSettings  from './pages/seller/Settings.jsx'
+
+// Admin pages
+import AdminDashboard from './pages/admin/Dashboard.jsx'
+import AdminUsers     from './pages/admin/Users.jsx'
+import AdminGigs      from './pages/admin/Gigs.jsx'
+import AdminOrders    from './pages/admin/Orders.jsx'
 
 // ── Chat Widget ───────────────────────────────────────────────────────────────
 function ChatWidget() {
@@ -470,22 +500,76 @@ function ChatWidget() {
   )
 }
 
+// ── Role-aware Dashboard Redirect ─────────────────────────────────────────────
+function DashboardRedirect() {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role === 'seller') return <Navigate to="/seller/dashboard" replace />
+  if (user.role === 'admin')  return <Navigate to="/admin/dashboard"  replace />
+  return <Navigate to="/client/dashboard" replace />
+}
+
 // ── Page Transitions Wrapper ──────────────────────────────────────────────────
 function AnimatedRoutes() {
   const loc = useLocation()
+  const noNav = loc.pathname.startsWith('/client') || loc.pathname.startsWith('/seller') || loc.pathname.startsWith('/admin')
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={loc} key={loc.pathname}>
-        <Route path="/"           element={<motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-20}}><Home /></motion.div>} />
-        <Route path="/login"      element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Login /></motion.div>} />
-        <Route path="/register"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Register /></motion.div>} />
-        <Route path="/gig/:id"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><GigDetail /></motion.div>} />
-        <Route path="/profile/:id" element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><UserProfile /></motion.div>} />
-        <Route path="/dashboard"  element={<Protected><motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Dashboard /></motion.div></Protected>} />
-        <Route path="/post-gig"   element={<Protected role="seller"><motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><PostGig /></motion.div></Protected>} />
-        <Route path="/admin"      element={<Protected role="admin"><motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><AdminPanel /></motion.div></Protected>} />
-      </Routes>
-    </AnimatePresence>
+    <>
+      {!noNav && <Navbar />}
+      <AnimatePresence mode="wait">
+        <Routes location={loc} key={loc.pathname.split('/').slice(0,2).join('/')}>
+
+          {/* ── Public ── */}
+          <Route path="/"          element={<motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} exit={{opacity:0}}><Home /></motion.div>} />
+          <Route path="/browse"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Browse /></motion.div>} />
+          <Route path="/categories"element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Categories /></motion.div>} />
+          <Route path="/sellers"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Sellers /></motion.div>} />
+          <Route path="/about"     element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><About /></motion.div>} />
+          <Route path="/login"     element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Login /></motion.div>} />
+          <Route path="/register"  element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Register /></motion.div>} />
+          <Route path="/gig/:id"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><GigDetail /></motion.div>} />
+          <Route path="/profile/:id" element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><UserProfile /></motion.div>} />
+
+          {/* ── Dashboard redirect ── */}
+          <Route path="/dashboard" element={<DashboardRedirect />} />
+          <Route path="/post-gig"  element={<Navigate to="/seller/gigs/new" replace />} />
+          <Route path="/admin"     element={<Navigate to="/admin/dashboard" replace />} />
+
+          {/* ── Client portal ── */}
+          <Route path="/client" element={<ClientLayout />}>
+            <Route index            element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<ClientDashboard />} />
+            <Route path="orders"    element={<ClientOrders />} />
+            <Route path="messages"  element={<ClientMessages />} />
+            <Route path="favourites"element={<ClientFavourites />} />
+            <Route path="settings"  element={<ClientSettings />} />
+          </Route>
+
+          {/* ── Seller portal ── */}
+          <Route path="/seller" element={<SellerLayout />}>
+            <Route index            element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<SellerDashboard />} />
+            <Route path="gigs"      element={<SellerGigs />} />
+            <Route path="gigs/new"  element={<SellerPostGig />} />
+            <Route path="orders"    element={<SellerOrders />} />
+            <Route path="earnings"  element={<SellerEarnings />} />
+            <Route path="messages"  element={<SellerMessages />} />
+            <Route path="settings"  element={<SellerSettings />} />
+          </Route>
+
+          {/* ── Admin portal ── */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index            element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users"     element={<AdminUsers />} />
+            <Route path="gigs"      element={<AdminGigs />} />
+            <Route path="orders"    element={<AdminOrders />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -496,7 +580,6 @@ export default function App() {
         <ToastProvider>
           <ServerStatusProvider>
             <BrowserRouter>
-              <Navbar />
               <AnimatedRoutes />
               <ChatWidget />
             </BrowserRouter>

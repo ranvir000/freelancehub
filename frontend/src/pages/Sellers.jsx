@@ -1,0 +1,110 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { api } from '../App.jsx'
+import { Search, Star, MapPin, Briefcase } from 'lucide-react'
+
+const MOCK_SELLERS = [
+  { id:1, name:'Ranvir Singh', bio:'Full-stack developer specializing in React, Django, and cloud solutions.', skills:['React','Django','PostgreSQL','AWS'], location:'Mumbai, India', hourly_rate:2500, total_earnings:450000, gig_count:5, completed_orders:128, avatar_url:'' },
+  { id:2, name:'Priya Kapoor', bio:'Brand designer and UI/UX specialist with 7 years creating stunning visuals.', skills:['Figma','Branding','Logo Design','Illustration'], location:'Delhi, India', hourly_rate:1800, total_earnings:320000, gig_count:8, completed_orders:310, avatar_url:'' },
+  { id:3, name:'Sara Liu',     bio:'Professional content writer with expertise in SEO and technical writing.', skills:['Blog Writing','SEO','Copywriting','Research'], location:'Bangalore, India', hourly_rate:1200, total_earnings:210000, gig_count:4, completed_orders:249, avatar_url:'' },
+  { id:4, name:'Alex Chen',   bio:'Data scientist & ML engineer helping businesses derive insights from data.', skills:['Python','TensorFlow','SQL','Tableau'], location:'Hyderabad, India', hourly_rate:3000, total_earnings:380000, gig_count:6, completed_orders:87, avatar_url:'' },
+  { id:5, name:'Neha Sharma', bio:'Digital marketing expert — growing brands through paid ads, SEO, and content.', skills:['Google Ads','Facebook Ads','SEO','Analytics'], location:'Pune, India', hourly_rate:1500, total_earnings:180000, gig_count:3, completed_orders:187, avatar_url:'' },
+  { id:6, name:'James Tran',  bio:'Video producer & editor creating engaging content for YouTube and social media.', skills:['Premiere Pro','After Effects','Color Grading','Motion Graphics'], location:'Chennai, India', hourly_rate:2000, total_earnings:260000, gig_count:5, completed_orders:134, avatar_url:'' },
+]
+
+const SKILLS = ['All','React','Python','Figma','SEO','Branding','Data Science','Video Editing','Django','Node.js']
+
+export default function Sellers() {
+  const navigate = useNavigate()
+  const [sellers,  setSellers]  = useState(MOCK_SELLERS)
+  const [loading,  setLoading]  = useState(true)
+  const [query,    setQuery]    = useState('')
+  const [skill,    setSkill]    = useState('All')
+
+  useEffect(() => {
+    const p = {}
+    if (query) p.search = query
+    if (skill && skill !== 'All') p.skill = skill
+    api.get('/api/sellers/', { params: p }).then(r => { if (r.data.length) setSellers(r.data) }).catch(() => {}).finally(() => setLoading(false))
+  }, [query, skill])
+
+  return (
+    <div style={{ paddingTop:64, minHeight:'100vh' }}>
+      <div style={{ background:'linear-gradient(135deg,var(--bg2),var(--bg))', borderBottom:'1px solid var(--border)', padding:'48px 0 32px' }}>
+        <div className="page-wrap">
+          <h1 style={{ fontSize:34, fontWeight:900, marginBottom:8 }}>Find Freelancers</h1>
+          <p style={{ color:'var(--muted)', fontSize:15, marginBottom:28 }}>Hire verified experts across all skill categories</p>
+          <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+            <div style={{ flex:1, minWidth:240, position:'relative' }}>
+              <Search size={16} style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'var(--muted)' }}/>
+              <input className="form-control" placeholder="Search by name, skill, or expertise..." value={query} onChange={e=>setQuery(e.target.value)} style={{ paddingLeft:42, height:44 }}/>
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:8, marginTop:16, flexWrap:'wrap' }}>
+            {SKILLS.map(s => (
+              <button key={s} onClick={() => setSkill(s)} style={{
+                padding:'5px 14px', borderRadius:20, fontSize:12, fontWeight:600, cursor:'pointer', border:'1.5px solid', transition:'all 0.15s',
+                background: skill===s ? 'var(--brand)' : 'transparent',
+                color: skill===s ? '#fff' : 'var(--muted)',
+                borderColor: skill===s ? 'var(--brand)' : 'var(--border)',
+              }}>{s}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="page-wrap" style={{ padding:'32px 24px' }}>
+        <p style={{ fontSize:13, color:'var(--muted)', marginBottom:20 }}>
+          {loading ? 'Finding freelancers...' : `${sellers.length} freelancer${sellers.length !== 1 ? 's' : ''} available`}
+        </p>
+        {loading ? (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+            {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton" style={{ height:220 }}/>)}
+          </div>
+        ) : (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:20 }}>
+            {sellers.map(s => {
+              const initials = s.name?.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2)
+              return (
+                <div key={s.id} className="seller-card" style={{ cursor:'pointer' }} onClick={() => navigate(`/profile/${s.id}`)}>
+                  <div style={{ display:'flex', gap:14, alignItems:'flex-start', marginBottom:14 }}>
+                    {s.avatar_url ? (
+                      <img src={s.avatar_url} alt="" style={{ width:52, height:52, borderRadius:'50%', objectFit:'cover', flexShrink:0 }}/>
+                    ) : (
+                      <div style={{ width:52, height:52, borderRadius:'50%', background:'linear-gradient(135deg,var(--brand),#8b5cf6)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, color:'#fff', fontSize:16, flexShrink:0 }}>{initials}</div>
+                    )}
+                    <div style={{ minWidth:0 }}>
+                      <h3 style={{ fontSize:15, fontWeight:700, color:'var(--text)', marginBottom:2 }}>{s.name}</h3>
+                      {s.location && (
+                        <p style={{ fontSize:12, color:'var(--muted)', display:'flex', alignItems:'center', gap:4, marginBottom:4 }}>
+                          <MapPin size={11}/>{s.location}
+                        </p>
+                      )}
+                      <div style={{ display:'flex', gap:12, fontSize:12, color:'var(--muted)' }}>
+                        <span><Briefcase size={11} style={{ marginRight:4 }}/>{s.gig_count || 0} gigs</span>
+                        <span>✅ {s.completed_orders || 0} orders</span>
+                      </div>
+                    </div>
+                    {s.hourly_rate && (
+                      <div style={{ marginLeft:'auto', textAlign:'right', flexShrink:0 }}>
+                        <p style={{ fontSize:12, color:'var(--muted)' }}>From</p>
+                        <p style={{ fontSize:15, fontWeight:800, color:'var(--brand)' }}>₹{Number(s.hourly_rate).toLocaleString()}/hr</p>
+                      </div>
+                    )}
+                  </div>
+                  <p style={{ fontSize:13, color:'var(--text2)', lineHeight:1.6, marginBottom:14, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{s.bio}</p>
+                  <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                    {(s.skills_list || s.skills || []).slice(0,4).map(sk => (
+                      <span key={sk} style={{ background:'var(--brand-l)', color:'var(--brand)', padding:'2px 10px', borderRadius:12, fontSize:11, fontWeight:600 }}>{sk}</span>
+                    ))}
+                  </div>
+                  <button className="btn btn-outline" style={{ width:'100%', marginTop:16, fontSize:13 }}>View Profile</button>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
