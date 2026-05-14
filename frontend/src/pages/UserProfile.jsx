@@ -92,7 +92,7 @@ export default function UserProfile() {
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', background:'var(--bg)' }}>
-      {/* Cover */}
+      {/* Cover band */}
       <div style={{ height:180, background:'linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#4c1d95 100%)', position:'relative' }}>
         {isOwnProfile && (
           <div style={{ position:'absolute', top:16, right:16 }}>
@@ -103,42 +103,57 @@ export default function UserProfile() {
         )}
       </div>
 
+      {/* Avatar row — sits between cover and card, fully outside both */}
+      <div className="page-wrap" style={{ padding:'0 20px' }}>
+        <div style={{ position:'relative', height:56 }}>
+          <div style={{ position:'absolute', top:-48, left:0, display:'flex', alignItems:'flex-end' }}>
+            <div style={{ position:'relative', flexShrink:0 }}>
+              {profile.img ? (
+                <img src={profile.img} alt={displayName} style={{ width:96, height:96, borderRadius:'50%', border:'4px solid var(--card)', objectFit:'cover' }}
+                     onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex' }} />
+              ) : null}
+              <div style={{
+                display: profile.img ? 'none' : 'flex',
+                width:96, height:96, borderRadius:'50%', background:'linear-gradient(135deg,var(--brand),#8b5cf6)',
+                color:'#fff', alignItems:'center', justifyContent:'center',
+                fontSize:30, fontWeight:800, border:'4px solid var(--card)', flexShrink:0
+              }}>{initials}</div>
+              {/* Online dot */}
+              <div style={{
+                position:'absolute', bottom:6, right:6, width:16, height:16,
+                background:'var(--success)', borderRadius:'50%', border:'3px solid var(--card)'
+              }} title="Online Now"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="page-wrap" style={{ padding:'0 20px 40px' }}>
-        {/* Avatar row */}
-        <div style={{ position:'relative', zIndex:10, display:'flex', alignItems:'flex-end', gap:24, marginTop:-50, marginBottom:24, flexWrap:'wrap' }}>
-          <div style={{ position:'relative' }}>
-            {profile.img ? (
-              <img src={profile.img} alt={displayName} style={{ width:100, height:100, borderRadius:'50%', border:'4px solid var(--bg)', objectFit:'cover', flexShrink:0 }}
-                   onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex' }} />
-            ) : null}
-            <div style={{
-              display: profile.img ? 'none' : 'flex',
-              width:100, height:100, borderRadius:'50%', background:'var(--brand)',
-              color:'#fff', alignItems:'center', justifyContent:'center',
-              fontSize:32, fontWeight:800, border:'4px solid var(--bg)', flexShrink:0
-            }}>{initials}</div>
-            {/* Online Indicator */}
-            <div style={{
-              position:'absolute', bottom:6, right:6, width:16, height:16,
-              background:'var(--success)', borderRadius:'50%', border:'3px solid var(--bg)',
-              boxShadow:'0 0 0 2px rgba(34,197,94,0.2)'
-            }} title="Online Now"></div>
-          </div>
-          <div style={{ paddingBottom:8, flex:1 }}>
-            <h1 style={{ fontSize:26, fontWeight:800, color:'var(--text)', marginBottom:6 }}>{displayName}</h1>
-            <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
-              <span className="badge badge-purple" style={{ textTransform:'capitalize' }}>{profile.role}</span>
-              {profile.email && <span style={{ fontSize:14, color:'var(--muted)' }}>📧 {profile.email}</span>}
-              {profile.location && <span style={{ fontSize:14, color:'var(--muted)' }}>📍 {profile.location}</span>}
-              {profile.joinedDate && <span style={{ fontSize:14, color:'var(--muted)' }}>🗓 Joined {profile.joinedDate}</span>}
+        {/* Profile header card — starts fully below the cover */}
+        <div className="card" style={{ padding:'20px 28px', marginBottom:24, position:'relative', zIndex:10 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:20, flexWrap:'wrap' }}>
+            {/* Spacer for avatar width */}
+            <div style={{ width:96, flexShrink:0 }} />
+
+            {/* Name + meta — entirely on the card background */}
+            <div style={{ flex:1, minWidth:0 }}>
+              <h1 style={{ fontSize:24, fontWeight:800, color:'var(--text)', marginBottom:6 }}>{displayName}</h1>
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
+                <span className="badge badge-purple" style={{ textTransform:'capitalize' }}>{profile.role}</span>
+                {profile.email   && <span style={{ fontSize:13, color:'var(--muted)' }}>📧 {profile.email}</span>}
+                {profile.location&& <span style={{ fontSize:13, color:'var(--muted)' }}>📍 {profile.location}</span>}
+                {profile.joinedDate&&<span style={{ fontSize:13, color:'var(--muted)' }}>🗓 Joined {profile.joinedDate}</span>}
+              </div>
             </div>
+
+            {/* CTA buttons */}
+            {!isOwnProfile && profile.role === 'seller' && (
+              <div style={{ display:'flex', gap:10, flexShrink:0 }}>
+                <button className="btn btn-outline" onClick={() => toast('Messaging coming soon! 📨', 'success')}>✉️ Message</button>
+                <button className="btn btn-primary" onClick={() => navigate('/')}>View Gigs</button>
+              </div>
+            )}
           </div>
-          {!isOwnProfile && profile.role === 'seller' && (
-            <div style={{ display:'flex', gap:12 }}>
-              <button className="btn btn-outline" onClick={() => toast('Messaging coming soon! 📨', 'success')}>✉️ Message</button>
-              <button className="btn btn-primary" onClick={() => navigate('/')}>View Gigs</button>
-            </div>
-          )}
         </div>
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 300px', gap:24, alignItems:'start' }}>

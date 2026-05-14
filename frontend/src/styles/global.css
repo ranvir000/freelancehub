@@ -80,8 +80,9 @@ input, select, textarea { font-family: inherit; }
 .btn-primary:hover { background: var(--brand-d); transform: translateY(-1px); box-shadow: var(--brand-glow); }
 .btn-outline  { background: transparent; color: var(--brand); border: 1.5px solid var(--brand); }
 .btn-outline:hover { background: var(--brand-l); }
-.btn-ghost    { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
-.btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
+.btn-ghost    { background: transparent; color: var(--muted); border: 1.5px solid var(--border2); }
+.btn-ghost:hover { background: var(--brand-l); border-color: var(--brand); color: var(--brand); }
+:root[data-theme="light"] .btn-ghost { color: var(--text2); border-color: var(--border2); }
 .btn-danger   { background: var(--danger); color: #fff; }
 .btn-success  { background: var(--success); color: #fff; }
 .btn-surface  { background: var(--surface); color: var(--text2); border: 1px solid var(--border2); }
@@ -350,5 +351,6 @@ nav {
 @media (max-width: 640px) {
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .page-wrap  { padding: 0 16px; }
+  .mobile-actions { display: flex !important; }
   .section    { padding: 48px 0; }
 }

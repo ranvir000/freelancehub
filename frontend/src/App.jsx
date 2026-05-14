@@ -216,9 +216,12 @@ function ThemeToggle({ isHome }) {
 // ── Navbar ────────────────────────────────────────────────────────────────────
 function Navbar() {
   const { user, logout } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const loc = useLocation()
-  const isHome = loc.pathname === '/'
+  // Only use transparent/white-text style on the home page when in DARK mode.
+  // In light mode the hero is near-white, so white text would be invisible.
+  const isHome = loc.pathname === '/' && theme === 'dark'
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
 
@@ -237,15 +240,13 @@ function Navbar() {
         <>
           <Link to="/browse" onClick={() => setMenuOpen(false)}>
             <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
-              color: mobile ? 'var(--text)' : mutedColor,
-              borderColor: mobile ? 'var(--border)' : borderColor,
+              ...(isHome && !mobile ? { color: '#fff', borderColor } : {}),
               width: mobile ? '100%' : undefined
             }}>Browse</button>
           </Link>
           <Link to={dashPath} onClick={() => setMenuOpen(false)}>
             <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
-              color: mobile ? 'var(--text)' : mutedColor,
-              borderColor: mobile ? 'var(--border)' : borderColor,
+              ...(isHome && !mobile ? { color: '#fff', borderColor } : {}),
               width: mobile ? '100%' : undefined
             }}>Dashboard</button>
           </Link>
@@ -305,16 +306,14 @@ function Navbar() {
           {[['Browse','/browse'],['Categories','/categories'],['Find Talent','/sellers'],['About','/about']].map(([label, path]) => (
             <Link key={path} to={path} onClick={() => setMenuOpen(false)}>
               <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
-                color: mobile ? 'var(--text)' : mutedColor,
-                borderColor: mobile ? 'var(--border)' : borderColor,
+                ...(isHome && !mobile ? { color: '#fff', borderColor } : {}),
                 width: mobile ? '100%' : undefined
               }}>{label}</button>
             </Link>
           ))}
           <Link to="/login" onClick={() => setMenuOpen(false)}>
             <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
-              color: mobile ? 'var(--text)' : mutedColor,
-              borderColor: mobile ? 'var(--border)' : borderColor,
+              ...(isHome && !mobile ? { color: '#fff', borderColor } : {}),
               width: mobile ? '100%' : undefined
             }}>Sign In</button>
           </Link>
@@ -348,7 +347,7 @@ function Navbar() {
         </div>
 
         {/* Mobile: theme toggle + hamburger */}
-        <div className="mobile-actions" style={{ alignItems: 'center', gap: 10 }}>
+        <div className="mobile-actions" style={{ display: 'none', alignItems: 'center', gap: 10 }}>
           <ThemeToggle isHome={isHome} />
           <button
             className={`hamburger${menuOpen ? ' open' : ''}`}
