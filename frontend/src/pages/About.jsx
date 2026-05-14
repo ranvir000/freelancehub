@@ -4,10 +4,8 @@ import { motion } from 'framer-motion'
 import { Users, Briefcase, Star, Shield, Zap, Heart } from 'lucide-react'
 
 const TEAM = [
-  { initials:'RS', name:'Ranvir Singh',     role:'Founder & CEO',    skills:'Django · React · Cloud' },
-  { initials:'PK', name:'Priya Kapoor',     role:'Head of Design',   skills:'Figma · Branding · UX' },
-  { initials:'AC', name:'Alex Chen',        role:'Lead Engineer',    skills:'Python · ML · DevOps' },
-  { initials:'NM', name:'Neha Mehta',       role:'Growth Lead',      skills:'Marketing · SEO · Ads' },
+  { initials:'RS', name:'Ranvir Singh', role:'Founder & CEO',    skills:'Django · React · Cloud' },
+  { initials:'MK', name:'Mukesh',       role:'Co-Founder & CTO', skills:'Node.js · React · DevOps' },
 ]
 const VALUES = [
   { icon:<Shield size={24}/>, title:'Trust First',   desc:'Every seller is verified. Secure payments and dispute resolution built in.' },
@@ -80,7 +78,7 @@ export default function About() {
             {TEAM.map((m, i) => (
               <motion.div key={m.name} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.1, duration:0.4 }}>
                 <div className="card" style={{ padding:28, textAlign:'center' }}>
-                  <div style={{ width:64, height:64, borderRadius:'50%', background:`linear-gradient(135deg,${['#6366f1','#ec4899','#14b8a6','#f59e0b'][i]},${['#8b5cf6','#f43f5e','#06b6d4','#ef4444'][i]})`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, color:'#fff', fontSize:18, margin:'0 auto 16px' }}>{m.initials}</div>
+                  <div style={{ width:64, height:64, borderRadius:'50%', background:`linear-gradient(135deg,${['#6366f1','#14b8a6'][i]},${['#8b5cf6','#06b6d4'][i]})`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, color:'#fff', fontSize:18, margin:'0 auto 16px' }}>{m.initials}</div>
                   <h3 style={{ fontSize:15, fontWeight:700, marginBottom:4 }}>{m.name}</h3>
                   <p style={{ fontSize:12, color:'var(--brand)', fontWeight:600, marginBottom:8 }}>{m.role}</p>
                   <p style={{ fontSize:11, color:'var(--muted)' }}>{m.skills}</p>
