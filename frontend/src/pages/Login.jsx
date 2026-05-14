@@ -117,6 +117,8 @@ export function Register() {
   const { login } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
+  const { status: serverStatus } = useServerStatus()
+  const isWarming = serverStatus === 'warming' || serverStatus === 'checking'
 
   async function handle(e) {
     if (e) e.preventDefault()
@@ -164,6 +166,27 @@ export function Register() {
         </div>
 
         <div className="card" style={{ padding:40, overflow:'hidden', position:'relative', minHeight:420 }}>
+          {/* Cold-start notice — same as Login page */}
+          <AnimatePresence>
+            {isWarming && step === 1 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                style={{
+                  background: '#fef3c7', border: '1px solid #f59e0b',
+                  borderRadius: 10, padding: '10px 14px', marginBottom: 16,
+                  fontSize: 13, color: '#92400e', display: 'flex', gap: 8, alignItems: 'flex-start'
+                }}
+              >
+                <span style={{ fontSize: 16, flexShrink: 0 }}>⏳</span>
+                <span>
+                  <strong>Server is starting up.</strong> This can take ~30 seconds.
+                  You can fill the form — it will register you once the server is ready.
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div key="step1" initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>

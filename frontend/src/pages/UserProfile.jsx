@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { api, useAuth, getGigImage } from '../App.jsx'
+import { api, useAuth, useToast, getGigImage } from '../App.jsx'
 
 // Mock sellers
 const MOCK_SELLERS = {
@@ -27,24 +27,10 @@ const MOCK_GIGS = {
   12: { title:'CI/CD pipeline with GitHub Actions', category:'Development' },
 }
 
-const GIG_IMAGES = {
-  1: '/images/gig_dev.png',
-  2: '/images/gig_design.png',
-  3: '/images/gig_dev.png',
-  4: '/images/gig_writing.png',
-  5: '/images/gig_dev.png',
-  6: '/images/gig_design.png',
-  7: '/images/gig_marketing.png',
-  8: '/images/gig_mobile.png',
-  9: '/images/gig_writing.png',
-  10: '/images/gig_design.png',
-  11: '/images/gig_marketing.png',
-  12: '/images/gig_devops.png',
-}
-
 export default function UserProfile() {
   const { id } = useParams()
   const { user: currentUser } = useAuth()
+  const toast = useToast()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -149,7 +135,7 @@ export default function UserProfile() {
           </div>
           {!isOwnProfile && profile.role === 'seller' && (
             <div style={{ display:'flex', gap:12 }}>
-              <button className="btn btn-outline" onClick={() => {}}>✉️ Message</button>
+              <button className="btn btn-outline" onClick={() => toast('Messaging coming soon! 📨', 'success')}>✉️ Message</button>
               <button className="btn btn-primary" onClick={() => navigate('/')}>View Gigs</button>
             </div>
           )}
@@ -304,8 +290,6 @@ export default function UserProfile() {
         </div>
       </div>
 
-      {/* Mobile responsive */}
-      <style>{`@media(max-width:700px){.page-wrap > div[style*="grid"]{grid-template-columns:1fr !important}}`}</style>
     </div>
   )
 }

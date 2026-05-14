@@ -23,9 +23,10 @@ export function PostGig() {
       await api.post('/api/gigs/', form)
       toast('Gig published successfully! 🎉')
       navigate('/dashboard')
-    } catch {
-      toast('Gig published successfully! 🎉')
-      navigate('/dashboard')
+    } catch (err) {
+      // Bug fix: show real error instead of false success
+      const msg = err.response?.data?.error || err.response?.data?.detail || 'Failed to publish gig. Please try again.'
+      toast(msg, 'error')
     } finally { setLoading(false) }
   }
 
@@ -153,8 +154,8 @@ export function AdminPanel() {
       </div>
 
       <div className="page-wrap" style={{ padding:'24px 20px' }}>
-        {/* Tab nav */}
-        <div style={{ display:'flex', gap:4, marginBottom:24, background:'#fff', borderRadius:10, border:'1px solid var(--border)', padding:4, width:'fit-content' }}>
+        {/* Tab nav — use var(--card) so it works in dark mode */}
+        <div style={{ display:'flex', gap:4, marginBottom:24, background:'var(--card)', borderRadius:10, border:'1px solid var(--border)', padding:4, width:'fit-content' }}>
           {TABS.map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)} style={{
               padding:'8px 18px', borderRadius:8, border:'none', fontSize:13, fontWeight:600, cursor:'pointer',
@@ -223,7 +224,7 @@ export function AdminPanel() {
                 </thead>
                 <tbody>
                   {data.users.map((u, i) => (
-                    <tr key={u.id} style={{ borderBottom:'1px solid var(--border)', background: i%2===0?'#fff':'var(--bg)' }}>
+                    <tr key={u.id} style={{ borderBottom:'1px solid var(--border)', background: i%2===0?'var(--card)':'var(--bg)' }}>
                       <td style={{ padding:'12px 16px', fontWeight:600, fontSize:14 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                           <div style={{ width:28, height:28, borderRadius:'50%', background:'var(--brand)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700 }}>
@@ -254,7 +255,7 @@ export function AdminPanel() {
                 </thead>
                 <tbody>
                   {data.gigs.map((g, i) => (
-                    <tr key={g.id} style={{ borderBottom:'1px solid var(--border)', background: i%2===0?'#fff':'var(--bg)' }}>
+                    <tr key={g.id} style={{ borderBottom:'1px solid var(--border)', background: i%2===0?'var(--card)':'var(--bg)' }}>
                       <td style={{ padding:'12px 16px', fontWeight:600, fontSize:13, maxWidth:200 }}>
                         <div style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{g.title}</div>
                       </td>
@@ -282,7 +283,7 @@ export function AdminPanel() {
                 </thead>
                 <tbody>
                   {data.orders.map((o, i) => (
-                    <tr key={o.id} style={{ borderBottom:'1px solid var(--border)', background: i%2===0?'#fff':'var(--bg)' }}>
+                    <tr key={o.id} style={{ borderBottom:'1px solid var(--border)', background: i%2===0?'var(--card)':'var(--bg)' }}>
                       <td style={{ padding:'12px 16px', fontWeight:600, fontSize:13, maxWidth:160 }}>
                         <div style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.gig_title}</div>
                       </td>

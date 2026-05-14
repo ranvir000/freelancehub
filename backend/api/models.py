@@ -13,8 +13,9 @@ class User(AbstractUser):
     role = admin  → sees admin panel
     """
     ROLES = [('buyer','Buyer'), ('seller','Seller'), ('admin','Admin')]
-    role = models.CharField(max_length=10, choices=ROLES, default='buyer')
-    bio  = models.TextField(blank=True, default='')
+    role           = models.CharField(max_length=10, choices=ROLES, default='buyer')
+    bio            = models.TextField(blank=True, default='')
+    total_earnings = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     class Meta:
         db_table = 'users'

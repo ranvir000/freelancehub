@@ -54,10 +54,10 @@ export default function GigDetail() {
       setOrdered(true)
       toast('Order placed successfully! 🎉')
       setTimeout(() => navigate('/dashboard'), 1500)
-    } catch {
-      setOrdered(true)
-      toast('Order placed successfully! 🎉')
-      setTimeout(() => navigate('/dashboard'), 1500)
+    } catch (err) {
+      // Bug fix: show real error instead of false success
+      const msg = err.response?.data?.error || err.response?.data?.detail || 'Failed to place order. Please try again.'
+      toast(msg, 'error')
     } finally { setOrdering(false) }
   }
 
@@ -184,8 +184,6 @@ export default function GigDetail() {
         </div>
       </div>
 
-      {/* Mobile: stack columns */}
-      <style>{`@media(max-width:700px){.page-wrap > div[style*="grid"]{grid-template-columns:1fr !important}}`}</style>
     </div>
   )
 }

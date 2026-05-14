@@ -68,7 +68,6 @@ function ServerStatusProvider({ children }) {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    let warmingTimer
     // Quick probe — if it doesn't respond in 3s, server is cold-starting
     const quickProbe = axios.create({ baseURL: BASE, timeout: 3000 })
     quickProbe.get('/api/auth/me/').then(() => {
@@ -88,7 +87,6 @@ function ServerStatusProvider({ children }) {
         setStatus('ready')
       }
     })
-    return () => clearTimeout(warmingTimer)
   }, [])
 
   const showBanner = (status === 'checking' || status === 'warming') && !dismissed

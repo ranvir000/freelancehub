@@ -1,19 +1,21 @@
+import uuid
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Gig, Order
+from .models import User, Gig, Order, Review
 
 
 class UserSerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField()
+    name           = serializers.ReadOnlyField()
+    total_earnings = serializers.ReadOnlyField()
 
     class Meta:
         model  = User
-        fields = ['id', 'username', 'name', 'email', 'role', 'bio']
+        fields = ['id', 'username', 'name', 'email', 'role', 'bio', 'total_earnings']
         read_only_fields = ['id']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=8)
     name     = serializers.CharField(write_only=True)
 
     class Meta:
@@ -23,8 +25,10 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         name  = validated_data.pop('name', '')
         parts = name.strip().split(' ', 1)
-        user  = User.objects.create_user(
-            username   = validated_data['email'].split('@')[0] + str(User.objects.count()),
+        # Use uuid suffix to prevent username collisions under concurrent registrations
+        username = validated_data['email'].split('@')[0][:20] + '_' + uuid.uuid4().hex[:6]
+        user = User.objects.create_user(
+            username   = username,
             email      = validated_data['email'],
             password   = validated_data['password'],
             first_name = parts[0],
@@ -107,35 +111,34 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    buyer_name  = serializers.ReadOnlyField(source='buyer.name')
+    buyer_name     = serializers.ReadOnlyField(source='buyer.name')
     buyer_initials = serializers.SerializerMethodField()
 
     class Meta:
-        model  = __import__('api.models', fromlist=['Review']).Review
+        model  = Review
         fields = ['id', 'buyer', 'buyer_name', 'buyer_initials', 'seller',
                   'gig', 'rating', 'comment', 'created_at']
         read_only_fields = ['id', 'buyer', 'seller', 'gig', 'created_at']
 
     def get_buyer_initials(self, obj):
-        name = obj.buyer.name
+        name  = obj.buyer.name
         parts = name.split()
-        return (parts[0][0] + (parts[1][0] if len(parts)>1 else '')).upper()
+        return (parts[0][0] + (parts[1][0] if len(parts) > 1 else '')).upper()
 
     def create(self, validated_data):
-        from api.models import Order
-        order  = Order.objects.get(id=self.context['request'].data.get('order'))
-        buyer  = self.context['request'].user
+        order = Order.objects.get(id=self.context['request'].data.get('order'))
+        buyer = self.context['request'].user
         if order.buyer != buyer:
             raise serializers.ValidationError('Only the buyer can review.')
         if order.status != 'completed':
             raise serializers.ValidationError('Order must be completed first.')
-        review = self.Meta.model.objects.create(
+        review = Review.objects.create(
             order=order, buyer=buyer, seller=order.seller, gig=order.gig,
             rating=validated_data['rating'], comment=validated_data['comment']
         )
         # Update gig rating
         gig     = order.gig
-        reviews = self.Meta.model.objects.filter(gig=gig)
+        reviews = Review.objects.filter(gig=gig)
         gig.rating       = round(sum(r.rating for r in reviews) / reviews.count(), 1)
         gig.review_count = reviews.count()
         gig.save()

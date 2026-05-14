@@ -44,6 +44,25 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
+# ── USERS ─────────────────────────────────────────────────────────────────────
+
+class UserDetailView(APIView):
+    """GET /api/users/<pk>/ — public profile lookup used by UserProfile page."""
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk):
+        # Support 'me' alias when authenticated
+        if pk == 'me':
+            if request.user.is_authenticated:
+                return Response(UserSerializer(request.user).data)
+            return Response({'error': 'Not authenticated'}, status=401)
+        try:
+            user = User.objects.get(pk=pk)
+            return Response(UserSerializer(user).data)
+        except (User.DoesNotExist, ValueError):
+            return Response({'error': 'User not found'}, status=404)
+
+
 # ── GIGS ──────────────────────────────────────────────────────────────────────
 
 class GigListCreateView(APIView):
@@ -66,7 +85,9 @@ class GigListCreateView(APIView):
             return Response({'error': 'Only sellers can post gigs.'}, status=403)
         s = GigSerializer(data=request.data, context={'request': request})
         if s.is_valid():
-            return Response(s.save().__dict__, status=201)
+            gig = s.save()
+            # Return properly serialized data (not raw __dict__)
+            return Response(GigSerializer(gig).data, status=201)
         return Response(s.errors, status=400)
 
 
@@ -119,15 +140,20 @@ class OrderDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_order(self, pk, user):
+        """Return the order only if the requesting user is buyer, seller, or admin."""
         try:
-            return Order.objects.get(pk=pk)
+            order = Order.objects.get(pk=pk)
         except Order.DoesNotExist:
             return None
+        # Authorization check — user must be a party to the order
+        if order.buyer != user and order.seller != user and user.role != 'admin':
+            return None
+        return order
 
     def patch(self, request, pk):
         order = self.get_order(pk, request.user)
         if not order:
-            return Response({'error': 'Not found'}, status=404)
+            return Response({'error': 'Not found or not authorized'}, status=404)
 
         new_status = request.data.get('status')
         if not new_status:
@@ -147,8 +173,8 @@ class OrderDetailView(APIView):
         elif is_buyer and allowed['buyer'].get(order.status) == new_status:
             order.status = new_status
             if new_status == 'completed':
-                # Release payment to seller
-                order.seller.total_earnings = getattr(order.seller, 'total_earnings', 0) + order.amount
+                # Release payment to seller — uses the proper DB field
+                order.seller.total_earnings += order.amount
                 order.seller.save()
                 order.gig.orders_completed += 1
                 order.gig.save()
@@ -242,7 +268,7 @@ class ReviewListCreateView(APIView):
     def get(self, request):
         from api.models import Review
         from api.serializers import ReviewSerializer
-        qs = Review.objects.select_related('buyer','seller','gig')
+        qs = Review.objects.select_related('buyer', 'seller', 'gig')
         if request.query_params.get('gig'):
             qs = qs.filter(gig__id=request.query_params['gig'])
         if request.query_params.get('seller'):

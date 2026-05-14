@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api, useAuth, useToast } from '../App.jsx'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
@@ -13,9 +13,9 @@ const STATUS_COLORS = {
 }
 
 const MOCK_ORDERS = [
-  { id:1, gig_title:'I will build a full-stack web app with React & Django', buyer_name:'Alex Morgan',  seller_name:'Ranvir Singh', package:'standard', amount:4999, status:'in_progress', created_at:'2026-04-15' },
-  { id:2, gig_title:'I will design a modern logo for your brand',            buyer_name:'James Taylor', seller_name:'Neha Sharma',  package:'basic',    amount:999,  status:'delivered',   created_at:'2026-04-18' },
-  { id:3, gig_title:'I will write SEO-optimized blog posts',                 buyer_name:'Alex Morgan',  seller_name:'Sara Liu',     package:'standard', amount:999,  status:'completed',   created_at:'2026-04-10' },
+  { id:1, gig_title:'I will build a full-stack web app with React & Django', buyer_name:'Alex Morgan',  seller_name:'Ranvir Singh', buyer:999, seller:1, package:'standard', amount:4999, status:'in_progress', created_at:'2026-04-15' },
+  { id:2, gig_title:'I will design a modern logo for your brand',            buyer_name:'James Taylor', seller_name:'Neha Sharma',  buyer:998, seller:2, package:'basic',    amount:999,  status:'delivered',   created_at:'2026-04-18' },
+  { id:3, gig_title:'I will write SEO-optimized blog posts',                 buyer_name:'Alex Morgan',  seller_name:'Sara Liu',     buyer:999, seller:3, package:'standard', amount:999,  status:'completed',   created_at:'2026-04-10' },
 ]
 
 // ── REVIEW MODAL ──────────────────────────────────────────────────────────────
@@ -120,12 +120,12 @@ export default function Dashboard() {
 
   if (!user) return null
 
-  async function updateStatus(orderId, status) {
+  async function updateStatus(orderId, newStatus) {
     try {
-      await api.patch(`/api/orders/${orderId}/`, { status })
+      await api.patch(`/api/orders/${orderId}/`, { status: newStatus })
     } catch {}
-    setOrders(p => p.map(o => o.id===orderId ? {...o, status} : o))
-    toast(`Order marked as ${status} ✓`)
+    setOrders(p => p.map(o => o.id===orderId ? {...o, status: newStatus} : o))
+    toast(`Order marked as ${newStatus} ✓`)
   }
 
   async function submitReview(order, rating, comment) {
@@ -136,17 +136,34 @@ export default function Dashboard() {
     toast('Review submitted! ⭐ Thank you!')
   }
 
-  // For new signups, orders list will be empty — show empty state correctly
+  // Bug fix: filter by user ID (not name) to correctly match real API orders
   const myOrders = orders.filter(o => {
-    if (user.role === 'admin') return true
-    if (user.role === 'buyer') return o.buyer_name === user.name
-    if (user.role === 'seller') return o.seller_name === user.name
+    if (user.role === 'admin')  return true
+    if (user.role === 'buyer')  return o.buyer  === user.id
+    if (user.role === 'seller') return o.seller === user.id
     return false
   })
 
-  const totalEarnings = myOrders.filter(o=>o.status==='completed').reduce((s,o)=>s+Number(o.amount),0)
-  const activeOrders  = myOrders.filter(o=>!['completed','cancelled'].includes(o.status)).length
+  const totalEarnings   = myOrders.filter(o=>o.status==='completed').reduce((s,o)=>s+Number(o.amount),0)
+  const activeOrders    = myOrders.filter(o=>!['completed','cancelled'].includes(o.status)).length
   const completedOrders = myOrders.filter(o=>o.status==='completed').length
+
+  // Build last-6-months chart data from actual orders
+  const chartData = useMemo(() => {
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    const now = new Date()
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+      const monthOrders = myOrders.filter(o => {
+        const od = new Date(o.created_at)
+        return od.getFullYear() === d.getFullYear() && od.getMonth() === d.getMonth()
+      })
+      return {
+        name: monthNames[d.getMonth()],
+        amount: monthOrders.reduce((s, o) => s + Number(o.amount), 0),
+      }
+    })
+  }, [myOrders])
 
   return (
     <div style={{ minHeight:'calc(100vh - 64px)', background:'var(--bg)' }}>
@@ -208,29 +225,26 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Analytics Charts */}
+        {/* Analytics Charts — uses real order data now */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(400px,1fr))', gap:24, marginBottom:32 }}>
           <div className="card" style={{ padding:24 }}>
-            <h3 style={{ fontSize:16, fontWeight:700, marginBottom:16, color:'var(--text)' }}>
+            <h3 style={{ fontSize:16, fontWeight:700, marginBottom:4, color:'var(--text)' }}>
               {user.role === 'seller' ? 'Earnings Overview' : 'Spending Overview'}
             </h3>
+            <p style={{ fontSize:12, color:'var(--muted)', marginBottom:16 }}>Based on your actual orders</p>
             <div style={{ height:250, width:'100%' }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={[
-                  { name: 'Jan', amount: 1200 }, { name: 'Feb', amount: 2100 },
-                  { name: 'Mar', amount: 1800 }, { name: 'Apr', amount: 3400 },
-                  { name: 'May', amount: 4800 }, { name: 'Jun', amount: 5200 },
-                ]}>
+                <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--brand)" stopOpacity={0.3}/>
+                      <stop offset="5%"  stopColor="var(--brand)" stopOpacity={0.3}/>
                       <stop offset="95%" stopColor="var(--brand)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} tickFormatter={v => `₹${v}`} dx={-10} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ borderRadius:8, border:'none', boxShadow:'var(--shadow-md)', background:'var(--card)' }}
                     itemStyle={{ color:'var(--brand)', fontWeight:700 }}
                   />
@@ -244,15 +258,15 @@ export default function Dashboard() {
             <div style={{ height:250, width:'100%' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { name: 'Pending', count: myOrders.filter(o=>o.status==='pending').length },
-                  { name: 'Active', count: activeOrders },
+                  { name: 'Pending',   count: myOrders.filter(o=>o.status==='pending').length },
+                  { name: 'Active',    count: activeOrders },
                   { name: 'Completed', count: completedOrders },
                   { name: 'Cancelled', count: myOrders.filter(o=>o.status==='cancelled').length },
                 ]} layout="vertical" margin={{ top: 0, right: 20, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--border)" />
                   <XAxis type="number" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} />
                   <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fill:'var(--muted)', fontSize:12}} dx={-10} />
-                  <Tooltip 
+                  <Tooltip
                     cursor={{fill:'var(--brand-l)'}}
                     contentStyle={{ borderRadius:8, border:'none', boxShadow:'var(--shadow-md)', background:'var(--card)' }}
                   />
