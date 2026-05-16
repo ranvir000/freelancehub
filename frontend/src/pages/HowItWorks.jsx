@@ -16,7 +16,6 @@ const ROLES = [
       { icon: '💬', title: 'Chat with Seller', desc: 'Use the built-in messaging system to communicate directly with the seller throughout the project.' },
       { icon: '✅', title: 'Review & Approve', desc: 'Once the work is delivered, review it and mark as complete. Then leave a star rating and review for the seller.' },
     ],
-    demo: { email: 'alex@gmail.com', password: 'demo1234', name: 'Alex Morgan', role: 'Buyer' },
     features: ['Browse all gigs', 'Place & track orders', 'Message sellers', 'Save favourites', 'Leave reviews'],
   },
   {
@@ -33,25 +32,7 @@ const ROLES = [
       { icon: '🚀', title: 'Deliver Work', desc: 'Mark the order as Delivered when done. The buyer reviews it and approves the delivery to release payment.' },
       { icon: '💰', title: 'Track Earnings', desc: 'See all your earnings, active gigs and completed orders in your seller dashboard. Grow your rating over time.' },
     ],
-    demo: { email: 'ranvir@gmail.com', password: 'demo1234', name: 'Ranvir Singh', role: 'Seller' },
     features: ['Post unlimited gigs', 'Manage orders', 'Message buyers', 'Track earnings', 'Build your profile'],
-  },
-  {
-    key: 'admin',
-    label: 'Admin',
-    emoji: '🛡️',
-    color: '#ef4444',
-    bg: 'linear-gradient(135deg,#b91c1c,#ef4444)',
-    desc: 'Manage the entire platform from one control panel',
-    steps: [
-      { icon: '👥', title: 'Manage Users', desc: 'View all registered users. Change their role (Buyer/Seller/Admin) or reset their password directly from the Users table.' },
-      { icon: '📁', title: 'Moderate Gigs', desc: 'See all gigs posted on the platform. Toggle any gig active/inactive to remove inappropriate or duplicate listings.' },
-      { icon: '📊', title: 'Monitor Orders', desc: 'Track all orders across the platform with full visibility into buyer, seller, amount, and current status.' },
-      { icon: '📈', title: 'View Stats', desc: 'The admin overview shows total users, gigs, orders, and revenue at a glance for quick health monitoring.' },
-      { icon: '🔑', title: 'Reset Passwords', desc: 'Any user who forgets their password can have it reset instantly from the admin panel — no email flow needed.' },
-    ],
-    demo: { email: 'admin@gmail.com', password: 'admin1234', name: 'Admin User', role: 'Admin' },
-    features: ['Full user control', 'Gig moderation', 'Order oversight', 'Password resets', 'Platform analytics'],
   },
 ]
 
@@ -136,15 +117,6 @@ export default function HowItWorks() {
               <h3 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)', marginBottom: 4 }}>{role.label}</h3>
               <p style={{ color: 'var(--muted)', fontSize: 14 }}>{role.desc}</p>
             </div>
-            {/* Demo credentials */}
-            <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 16px', fontSize: 13 }}>
-              <p style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>🔑 Demo Login</p>
-              <p style={{ color: 'var(--muted)', marginBottom: 2 }}>Email: <strong style={{ color: 'var(--brand)' }}>{role.demo.email}</strong></p>
-              <p style={{ color: 'var(--muted)', marginBottom: 8 }}>Password: <strong style={{ color: 'var(--brand)' }}>{role.demo.password}</strong></p>
-              <button className="btn btn-primary btn-sm" onClick={() => navigate('/login')} style={{ width: '100%', background: role.bg, border: 'none' }}>
-                Login as {role.demo.name}
-              </button>
-            </div>
           </div>
 
           {/* Steps */}
@@ -210,48 +182,10 @@ export default function HowItWorks() {
           </div>
         </div>
 
-        {/* ── All Demo Accounts ── */}
-        <div style={{ marginBottom: 48 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)', textAlign: 'center', marginBottom: 8 }}>Demo Accounts</h2>
-          <p style={{ color: 'var(--muted)', textAlign: 'center', marginBottom: 32 }}>Use these to log in and explore each role</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16 }}>
-            {[
-              { name:'Ranvir Singh',  email:'ranvir@gmail.com', password:'demo1234', role:'Seller', color:'#8b5cf6', emoji:'💼' },
-              { name:'Priya Kapoor',  email:'priya@gmail.com',  password:'demo1234', role:'Seller', color:'#8b5cf6', emoji:'💼' },
-              { name:'Sara Liu',      email:'sara@gmail.com',   password:'demo1234', role:'Seller', color:'#8b5cf6', emoji:'💼' },
-              { name:'Arjun Patel',   email:'arjun@gmail.com',  password:'demo1234', role:'Seller', color:'#8b5cf6', emoji:'💼' },
-              { name:'Kiran Mehta',   email:'kiran@gmail.com',  password:'demo1234', role:'Seller', color:'#8b5cf6', emoji:'💼' },
-              { name:'Amit Verma',    email:'amit@gmail.com',   password:'demo1234', role:'Seller', color:'#8b5cf6', emoji:'💼' },
-              { name:'Alex Morgan',   email:'alex@gmail.com',   password:'demo1234', role:'Buyer',  color:'#3b82f6', emoji:'🛍️' },
-              { name:'James Taylor',  email:'james@gmail.com',  password:'demo1234', role:'Buyer',  color:'#3b82f6', emoji:'🛍️' },
-              { name:'Admin User',    email:'admin@gmail.com',  password:'admin1234',role:'Admin',  color:'#ef4444', emoji:'🛡️' },
-            ].map(acc => (
-              <div key={acc.email} className="card" style={{ padding: 20, borderLeft: `4px solid ${acc.color}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: `linear-gradient(135deg,${acc.color},${acc.color}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-                    {acc.emoji}
-                  </div>
-                  <div>
-                    <p style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{acc.name}</p>
-                    <span style={{ fontSize: 11, background: `${acc.color}20`, color: acc.color, padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>{acc.role}</span>
-                  </div>
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>
-                  <p style={{ marginBottom: 2 }}>📧 {acc.email}</p>
-                  <p>🔑 {acc.password}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <p style={{ textAlign:'center', marginTop:16, fontSize:13, color:'var(--muted)' }}>
-            💡 Other registered accounts (chuck, huel, etc.) can have passwords reset from the <strong>Admin → Users</strong> panel.
-          </p>
-        </div>
-
         {/* ── CTA ── */}
         <div style={{ textAlign: 'center', padding: '40px 20px', background: 'linear-gradient(135deg,var(--brand-l),var(--bg2))', borderRadius: 16, border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', marginBottom: 8 }}>Ready to explore?</h2>
-          <p style={{ color: 'var(--muted)', marginBottom: 24 }}>Log in with any demo account above to see the platform in action</p>
+          <p style={{ color: 'var(--muted)', marginBottom: 24 }}>Sign up today to see the platform in action</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button className="btn btn-primary" onClick={() => navigate('/login')} style={{ padding: '12px 32px' }}>Sign In</button>
             <button className="btn btn-outline" onClick={() => navigate('/browse')} style={{ padding: '12px 32px' }}>Browse Gigs</button>

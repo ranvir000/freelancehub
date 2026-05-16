@@ -47,6 +47,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         model  = User
         fields = ['name', 'email', 'password', 'role', 'bio']
 
+    def validate(self, attrs):
+        if User.objects.filter(email__iexact=attrs.get('email')).exists():
+            raise serializers.ValidationError({'message': 'A user with this email already exists.'})
+        return attrs
+
     def create(self, validated_data):
         name  = validated_data.pop('name', '')
         parts = name.strip().split(' ', 1)
@@ -68,9 +73,8 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        try:
-            user = User.objects.get(email__iexact=data['email'])
-        except User.DoesNotExist:
+        user = User.objects.filter(email__iexact=data['email']).first()
+        if not user:
             raise serializers.ValidationError({'message': 'No account with this email.'})
         if not user.check_password(data['password']):
             raise serializers.ValidationError({'message': 'Incorrect password.'})
