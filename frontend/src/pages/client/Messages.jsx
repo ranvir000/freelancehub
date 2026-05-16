@@ -64,6 +64,8 @@ export default function ClientMessages() {
   // ── Send message ─────────────────────────────────────────────────────────────
   async function send() {
     if (!text.trim() || !active || sending) return
+    // Prevent self-messaging
+    if (String(active.partner_id) === String(user.id)) return
     const content = text.trim()
     setText('')
     setSending(true)
@@ -87,22 +89,48 @@ export default function ClientMessages() {
     }
   }
 
-  // ── Load sellers for picker ──────────────────────────────────────────────────
+  // ── Load ALL messageable users (sellers list + order partners, excluding self) ─
   function openPicker() {
     setShowPicker(true)
     setSellerQ('')
     setLoadSellers(true)
-    api.get('/api/sellers/')
-      .then(r => setSellers(r.data))
-      .catch(() => setSellers([]))
-      .finally(() => setLoadSellers(false))
+    Promise.all([
+      api.get('/api/sellers/').catch(() => ({ data: [] })),
+      api.get('/api/orders/').catch(() => ({ data: [] })),
+    ]).then(([sellersRes, ordersRes]) => {
+      // Start with all sellers
+      const sellerList = sellersRes.data.filter(s => String(s.id) !== String(user.id))
+      // Also extract buyers from orders (for sellers wanting to message their buyers)
+      const orderPartners = (ordersRes.data || []).map(o => {
+        if (String(o.buyer) === String(user.id) || o.buyer_name === user.name) {
+          // Current user is buyer — seller is the partner
+          return o.seller ? { id: o.seller, name: o.seller_name, role: 'seller' } : null
+        } else {
+          // Current user is seller — buyer is the partner
+          return o.buyer ? { id: o.buyer, name: o.buyer_name, role: 'buyer' } : null
+        }
+      }).filter(Boolean)
+
+      // Merge, deduplicate by id, exclude self
+      const seen = new Set()
+      const merged = [...sellerList, ...orderPartners].filter(u => {
+        const sid = String(u.id)
+        if (sid === String(user.id) || seen.has(sid)) return false
+        seen.add(sid)
+        return true
+      })
+      setSellers(merged)
+    }).catch(() => setSellers([])).finally(() => setLoadSellers(false))
   }
 
-  function startConvoWith(seller) {
+  function startConvoWith(person) {
     setShowPicker(false)
-    const conv = { partner_id: seller.id, partner_name: seller.name, partner_role: 'seller', last_message: '', unread_count: 0 }
+    // Prevent messaging yourself
+    if (String(person.id) === String(user.id)) return
+    const partnerRole = person.role || (person.hourly_rate !== undefined ? 'seller' : 'buyer')
+    const conv = { partner_id: person.id, partner_name: person.name, partner_role: partnerRole, last_message: '', unread_count: 0 }
     setConvs(p => {
-      const exists = p.find(c => String(c.partner_id) === String(seller.id))
+      const exists = p.find(c => String(c.partner_id) === String(person.id))
       return exists ? p : [conv, ...p]
     })
     setActive(conv)
@@ -111,7 +139,8 @@ export default function ClientMessages() {
 
   const filteredSellers = sellers.filter(s =>
     s.name?.toLowerCase().includes(sellerQ.toLowerCase()) ||
-    s.bio?.toLowerCase().includes(sellerQ.toLowerCase())
+    s.bio?.toLowerCase().includes(sellerQ.toLowerCase()) ||
+    s.email?.toLowerCase().includes(sellerQ.toLowerCase())
   )
 
   return (
@@ -141,7 +170,7 @@ export default function ClientMessages() {
               {loadSellers ? (
                 [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: 60, margin: 12, borderRadius: 8 }} />)
               ) : filteredSellers.length === 0 ? (
-                <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>No sellers found</div>
+                <div style={{ padding: 40, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>No users found</div>
               ) : filteredSellers.map(s => (
                 <div key={s.id} onClick={() => startConvoWith(s)}
                   style={{ padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', transition: 'background 0.1s', borderBottom: '1px solid var(--border)' }}
@@ -153,7 +182,9 @@ export default function ClientMessages() {
                   </div>
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{s.name}</p>
-                    <p style={{ fontSize: 11, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.bio || 'Seller'}</p>
+                    <p style={{ fontSize: 11, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {s.role ? s.role.charAt(0).toUpperCase() + s.role.slice(1) : (s.bio || 'User')}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -242,14 +273,14 @@ export default function ClientMessages() {
                 {msgs.map((m, i) => {
                   const mine = String(m.sender) === String(user.id)
                   return (
-                    <div key={m.id || i} style={{ display: 'flex', flexDirection: mine ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end' }}>
+                    <div key={m.id || i} style={{ display: 'flex', flexDirection: mine ? 'row-reverse' : 'row', gap: 8, alignItems: 'flex-end', minWidth: 0 }}>
                       {!mine && (
                         <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,var(--brand),#8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
                           {active.partner_name?.slice(0, 2).toUpperCase()}
                         </div>
                       )}
-                      <div>
-                        <div className={`chat-bubble ${mine ? 'mine' : 'theirs'}`}>{m.content}</div>
+                      <div style={{ minWidth: 0, maxWidth: '70%' }}>
+                        <div className={`chat-bubble ${mine ? 'mine' : 'theirs'}`} style={{ maxWidth: '100%' }}>{m.content}</div>
                         <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4, textAlign: mine ? 'right' : 'left' }}>
                           {m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                         </p>

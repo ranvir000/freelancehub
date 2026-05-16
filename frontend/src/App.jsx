@@ -407,35 +407,56 @@ import AdminGigs      from './pages/admin/Gigs.jsx'
 import AdminOrders    from './pages/admin/Orders.jsx'
 
 // ── Chat Widget ───────────────────────────────────────────────────────────────
+const SUPPORT_REPLIES = [
+  "Thanks for reaching out! I'm looking into that for you right now. 🔍",
+  "Great question! Could you share a bit more detail so I can help you better?",
+  "I understand. Let me check that for you — this usually takes just a moment.",
+  "I've escalated this to our team. You'll receive an email update within 24 hours. ✅",
+  "Happy to help! Here's what I'd suggest: visit your dashboard for real-time updates, or reply here if you need more assistance.",
+  "That's been noted. Is there anything else I can help you with today? 😊",
+]
+
 function ChatWidget() {
   const { user } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [msgs, setMsgs] = useState([])
+  const loc      = useLocation()
+  const [open, setOpen]   = useState(false)
+  const [msgs, setMsgs]   = useState([])
   const [input, setInput] = useState('')
+  const [typing, setTyping] = useState(false)
+  const replyIdx = useRef(0)
 
-  if (!user) return null
+  // Hide on messages pages (avoid collision with send button)
+  const isMessagesPage = loc.pathname.includes('/messages')
+  if (!user || isMessagesPage) return null
 
   const handleSend = (e) => {
     e.preventDefault()
-    if(!input.trim()) return
-    setMsgs([...msgs, {text:input, isUser:true}])
+    if (!input.trim()) return
+    const userMsg = input.trim()
+    setMsgs(p => [...p, { text: userMsg, isUser: true }])
     setInput('')
+    setTyping(true)
+    // Realistic delay (1-2s) then show a rotating reply
+    const delay = 1000 + Math.random() * 800
     setTimeout(() => {
-      setMsgs(p => [...p, {text:"Thanks for reaching out! A support agent will be with you shortly.", isUser:false}])
-    }, 1000)
+      const reply = SUPPORT_REPLIES[replyIdx.current % SUPPORT_REPLIES.length]
+      replyIdx.current += 1
+      setTyping(false)
+      setMsgs(p => [...p, { text: reply, isUser: false }])
+    }, delay)
   }
 
   return (
     <>
-      <div 
+      <div
         onClick={() => setOpen(!open)}
         style={{
-          position:'fixed', bottom:24, right:24, width:60, height:60, borderRadius:'50%',
+          position:'fixed', bottom:24, right:24, width:56, height:56, borderRadius:'50%',
           background:'var(--brand)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center',
           boxShadow:'0 10px 24px rgba(99,102,241,0.4)', cursor:'pointer', zIndex:1000,
-          fontSize:26, transition:'transform 0.2s'
+          fontSize:24, transition:'transform 0.2s'
         }}
-        onMouseEnter={e=>e.currentTarget.style.transform='scale(1.05)'}
+        onMouseEnter={e=>e.currentTarget.style.transform='scale(1.08)'}
         onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
       >
         {open ? '✕' : '💬'}
@@ -444,52 +465,63 @@ function ChatWidget() {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity:0, y:20, scale:0.9, originY:1, originX:1 }}
+            initial={{ opacity:0, y:20, scale:0.9 }}
             animate={{ opacity:1, y:0, scale:1 }}
             exit={{ opacity:0, y:20, scale:0.9 }}
             transition={{ duration:0.2 }}
             style={{
-              position:'fixed', bottom:96, right:24, width:340, height:480,
+              position:'fixed', bottom:90, right:24, width:340, height:460,
               background:'var(--card)', borderRadius:16, border:'1px solid var(--border)',
               boxShadow:'0 24px 48px rgba(0,0,0,0.2)', zIndex:1000,
               display:'flex', flexDirection:'column', overflow:'hidden'
             }}
           >
             {/* Header */}
-            <div style={{ background:'linear-gradient(135deg,var(--brand),var(--brand-d))', padding:'16px', color:'#fff', display:'flex', alignItems:'center', gap:12 }}>
+            <div style={{ background:'linear-gradient(135deg,var(--brand),var(--brand-d))', padding:'14px 16px', color:'#fff', display:'flex', alignItems:'center', gap:12 }}>
               <div style={{ position:'relative' }}>
-                <div style={{ width:40, height:40, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:14 }}>FH</div>
-                <div style={{ position:'absolute', bottom:0, right:0, width:12, height:12, background:'var(--success)', borderRadius:'50%', border:'2px solid var(--brand-d)' }}/>
+                <div style={{ width:38, height:38, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:13 }}>FH</div>
+                <div style={{ position:'absolute', bottom:0, right:0, width:11, height:11, background:'#22c55e', borderRadius:'50%', border:'2px solid var(--brand-d)' }}/>
               </div>
               <div>
-                <p style={{ fontWeight:700, fontSize:15, marginBottom:2 }}>Support Team</p>
-                <p style={{ fontSize:12, color:'rgba(255,255,255,0.8)' }}>Typically replies instantly</p>
+                <p style={{ fontWeight:700, fontSize:14, marginBottom:1 }}>Support Team</p>
+                <p style={{ fontSize:11, color:'rgba(255,255,255,0.8)' }}>Typically replies within minutes</p>
               </div>
             </div>
             {/* Body */}
-            <div style={{ flex:1, padding:16, background:'var(--bg)', overflowY:'auto', display:'flex', flexDirection:'column', gap:12 }}>
-              <div style={{ textAlign:'center', fontSize:12, color:'var(--muted)', margin:'4px 0' }}>Today</div>
-              <div style={{ background:'var(--card)', padding:'10px 14px', borderRadius:'14px 14px 14px 4px', border:'1px solid var(--border)', alignSelf:'flex-start', maxWidth:'85%', fontSize:14, color:'var(--text)', boxShadow:'var(--shadow-sm)' }}>
+            <div style={{ flex:1, padding:14, background:'var(--bg)', overflowY:'auto', display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ textAlign:'center', fontSize:11, color:'var(--muted)', margin:'4px 0' }}>Today</div>
+              <div style={{ background:'var(--card)', padding:'10px 13px', borderRadius:'12px 12px 12px 3px', border:'1px solid var(--border)', alignSelf:'flex-start', maxWidth:'85%', fontSize:13, color:'var(--text)' }}>
                 Hi {user.name?.split(' ')[0]}! 👋 How can we help you today?
               </div>
               {msgs.map((m, i) => (
-                <div key={i} style={{ 
-                  background: m.isUser ? 'var(--brand)' : 'var(--card)', 
+                <div key={i} style={{
+                  background: m.isUser ? 'var(--brand)' : 'var(--card)',
                   color: m.isUser ? '#fff' : 'var(--text)',
-                  padding:'10px 14px', borderRadius: m.isUser ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
+                  padding:'10px 13px',
+                  borderRadius: m.isUser ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
                   border: m.isUser ? 'none' : '1px solid var(--border)',
-                  alignSelf: m.isUser ? 'flex-end' : 'flex-start', 
-                  maxWidth:'85%', fontSize:14, boxShadow:'var(--shadow-sm)' 
+                  alignSelf: m.isUser ? 'flex-end' : 'flex-start',
+                  maxWidth:'85%', fontSize:13,
                 }}>
                   {m.text}
                 </div>
               ))}
+              {typing && (
+                <div style={{ background:'var(--card)', padding:'10px 14px', borderRadius:'12px 12px 12px 3px', border:'1px solid var(--border)', alignSelf:'flex-start', fontSize:13, color:'var(--muted)' }}>
+                  <span style={{ letterSpacing: 2 }}>● ● ●</span>
+                </div>
+              )}
             </div>
             {/* Input */}
-            <form onSubmit={handleSend} style={{ padding:16, borderTop:'1px solid var(--border)', background:'var(--card)', display:'flex', gap:8 }}>
-              <input value={input} onChange={e=>setInput(e.target.value)} placeholder="Type a message..." style={{ flex:1, padding:'10px 16px', borderRadius:24, border:'1px solid var(--border)', outline:'none', background:'var(--input-bg)', color:'var(--text)', fontSize:14 }} />
-              <button type="submit" disabled={!input.trim()} style={{ width:40, height:40, borderRadius:'50%', background: input.trim() ? 'var(--brand)' : 'var(--border)', color:'#fff', border:'none', display:'flex', alignItems:'center', justifyContent:'center', cursor: input.trim() ? 'pointer' : 'default', transition:'background 0.2s' }}>
-                <span style={{transform:'rotate(90deg) translateX(2px)'}}>▲</span>
+            <form onSubmit={handleSend} style={{ padding:'12px 14px', borderTop:'1px solid var(--border)', background:'var(--card)', display:'flex', gap:8 }}>
+              <input
+                value={input}
+                onChange={e=>setInput(e.target.value)}
+                placeholder="Type a message..."
+                style={{ flex:1, padding:'9px 14px', borderRadius:20, border:'1px solid var(--border)', outline:'none', background:'var(--input-bg)', color:'var(--text)', fontSize:13 }}
+              />
+              <button type="submit" disabled={!input.trim()} style={{ width:36, height:36, borderRadius:'50%', background: input.trim() ? 'var(--brand)' : 'var(--border)', color:'#fff', border:'none', display:'flex', alignItems:'center', justifyContent:'center', cursor: input.trim() ? 'pointer' : 'default', flexShrink:0 }}>
+                <span style={{fontSize:14}}>➤</span>
               </button>
             </form>
           </motion.div>
