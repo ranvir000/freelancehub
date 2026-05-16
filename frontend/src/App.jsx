@@ -303,7 +303,7 @@ function Navbar() {
         </>
       ) : (
         <>
-          {[['Browse','/browse'],['Categories','/categories'],['Find Talent','/sellers'],['About','/about']].map(([label, path]) => (
+          {[['Browse','/browse'],['Categories','/categories'],['Find Talent','/sellers'],['How it Works','/how-it-works'],['About','/about']].map(([label, path]) => (
             <Link key={path} to={path} onClick={() => setMenuOpen(false)}>
               <button className={mobile ? 'btn btn-ghost' : 'btn btn-ghost btn-sm'} style={{
                 ...(isHome && !mobile ? { color: '#fff', borderColor } : {}),
@@ -374,6 +374,7 @@ import Browse      from './pages/Browse.jsx'
 import Categories  from './pages/Categories.jsx'
 import Sellers     from './pages/Sellers.jsx'
 import About       from './pages/About.jsx'
+import HowItWorks  from './pages/HowItWorks.jsx'
 import Login       from './pages/Login.jsx'
 import Register    from './pages/Register.jsx'
 import GigDetail   from './pages/GigDetail.jsx'
@@ -599,6 +600,7 @@ function AnimatedRoutes() {
             <Route path="/categories" element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Categories /></motion.div>} />
             <Route path="/sellers"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Sellers /></motion.div>} />
             <Route path="/about"      element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><About /></motion.div>} />
+            <Route path="/how-it-works"element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><HowItWorks /></motion.div>} />
             <Route path="/login"      element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Login /></motion.div>} />
             <Route path="/register"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Register /></motion.div>} />
             <Route path="/gig/:id"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><GigDetail /></motion.div>} />

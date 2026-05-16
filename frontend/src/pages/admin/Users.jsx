@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { api, useToast } from '../../App.jsx'
-import { Search, Shield } from 'lucide-react'
+import { Search, KeyRound } from 'lucide-react'
 
 export default function AdminUsers() {
   const toast = useToast()
-  const [users, setUsers]   = useState([])
-  const [loading, setLoading] = useState(true)
-  const [query, setQuery]   = useState('')
+  const [users, setUsers]       = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [query, setQuery]       = useState('')
+  const [resetModal, setResetModal] = useState(null) // { id, name }
+  const [newPw, setNewPw]       = useState('demo1234')
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     api.get('/api/admin/users/').then(r=>setUsers(r.data)).catch(()=>{}).finally(()=>setLoading(false))
@@ -15,7 +18,20 @@ export default function AdminUsers() {
   async function changeRole(id, role) {
     try { await api.patch(`/api/admin/users/${id}/`, { role }) } catch {}
     setUsers(p => p.map(u => u.id===id ? {...u, role} : u))
-    toast(`User role changed to ${role}`)
+    toast(`Role changed to ${role}`)
+  }
+
+  async function resetPassword() {
+    if (!newPw || newPw.length < 6) { toast('Password must be at least 6 characters', 'error'); return }
+    setResetting(true)
+    try {
+      await api.patch(`/api/admin/users/${resetModal.id}/`, { password: newPw })
+      toast(`✅ Password reset for ${resetModal.name}`)
+      setResetModal(null)
+      setNewPw('demo1234')
+    } catch (e) {
+      toast(e.response?.data?.error || 'Reset failed', 'error')
+    } finally { setResetting(false) }
   }
 
   const filtered = users.filter(u =>
@@ -27,7 +43,38 @@ export default function AdminUsers() {
   return (
     <div className="portal-page">
       <h1 className="portal-page-title">User Management</h1>
-      <p className="portal-page-sub">{users.length} total users</p>
+      <p className="portal-page-sub">{users.length} total users — click 🔑 to reset any user's password</p>
+
+      {/* Reset Password Modal */}
+      {resetModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:500 }}>
+          <div className="card" style={{ width:380, padding:28 }}>
+            <h3 style={{ fontSize:17, fontWeight:700, marginBottom:6 }}>🔑 Reset Password</h3>
+            <p style={{ fontSize:13, color:'var(--muted)', marginBottom:20 }}>
+              Set a new password for <strong>{resetModal.name}</strong>
+            </p>
+            <div className="form-group">
+              <label>New Password</label>
+              <input
+                className="form-control"
+                value={newPw}
+                onChange={e => setNewPw(e.target.value)}
+                placeholder="Enter new password (min 6 chars)"
+                autoFocus
+                onKeyDown={e => e.key === 'Enter' && resetPassword()}
+              />
+            </div>
+            <div style={{ display:'flex', gap:10, marginTop:20 }}>
+              <button className="btn btn-primary" onClick={resetPassword} disabled={resetting} style={{ flex:1 }}>
+                {resetting ? 'Resetting...' : 'Reset Password'}
+              </button>
+              <button className="btn btn-outline" onClick={() => { setResetModal(null); setNewPw('demo1234') }} style={{ flex:1 }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display:'flex', gap:16, marginBottom:20, flexWrap:'wrap' }}>
         {['buyer','seller','admin'].map(r=>(
@@ -40,13 +87,13 @@ export default function AdminUsers() {
 
       <div style={{position:'relative',marginBottom:20}}>
         <Search size={16} style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)',color:'var(--muted)'}}/>
-        <input className="form-control" placeholder="Search users by name or email..." value={query} onChange={e=>setQuery(e.target.value)} style={{paddingLeft:42,height:44}}/>
+        <input className="form-control" placeholder="Search by name or email..." value={query} onChange={e=>setQuery(e.target.value)} style={{paddingLeft:42,height:44}}/>
       </div>
 
       <div className="card" style={{overflow:'auto'}}>
         {loading ? [1,2,3,4,5].map(i=><div key={i} className="skeleton" style={{height:56,margin:8}}/>) : (
           <table className="data-table">
-            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Gigs</th><th>Actions</th></tr></thead>
+            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Gigs</th><th>Change Role</th><th>Password</th></tr></thead>
             <tbody>
               {filtered.map(u=>(
                 <tr key={u.id}>
@@ -69,6 +116,15 @@ export default function AdminUsers() {
                       <option value="seller">Seller</option>
                       <option value="admin">Admin</option>
                     </select>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => { setResetModal({ id: u.id, name: u.name }); setNewPw('demo1234') }}
+                      style={{ background:'none', border:'1px solid var(--border)', borderRadius:6, padding:'4px 10px', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:12, color:'var(--text)' }}
+                      title="Reset password"
+                    >
+                      <KeyRound size={13}/> Reset
+                    </button>
                   </td>
                 </tr>
               ))}

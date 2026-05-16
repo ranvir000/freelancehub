@@ -371,6 +371,12 @@ class AdminUsersView(APIView):
             if 'role' in request.data:
                 user.role = request.data['role']
                 user.save()
+            if 'password' in request.data:
+                new_pw = request.data['password']
+                if len(new_pw) < 6:
+                    return Response({'error': 'Password must be at least 6 characters'}, status=400)
+                user.set_password(new_pw)
+                user.save()
             return Response({'success': True})
         except User.DoesNotExist:
             return Response({'error': 'Not found'}, status=404)
