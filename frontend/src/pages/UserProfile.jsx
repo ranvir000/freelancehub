@@ -149,8 +149,30 @@ export default function UserProfile() {
             {/* CTA buttons */}
             {!isOwnProfile && profile.role === 'seller' && (
               <div style={{ display:'flex', gap:10, flexShrink:0 }}>
-                <button className="btn btn-outline" onClick={() => toast('Messaging coming soon! 📨', 'success')}>✉️ Message</button>
-                <button className="btn btn-primary" onClick={() => navigate('/')}>View Gigs</button>
+                <button className="btn btn-outline" onClick={async () => {
+                  if (!currentUser) { navigate('/login'); return }
+                  const msgPath = currentUser.role === 'seller' ? '/seller/messages' : '/client/messages'
+                  // If we have a real numeric ID, go straight to the conversation
+                  if (typeof profile.id === 'number') {
+                    const params = new URLSearchParams({ with: profile.id, name: profile.name || displayName, role: 'seller' })
+                    navigate(`${msgPath}?${params}`)
+                    return
+                  }
+                  // Mock profile — try to find the real seller by name via API
+                  try {
+                    const res = await api.get('/api/sellers/', { params: { search: displayName } })
+                    const match = res.data.find(s => s.name === displayName || s.name?.includes(displayName.split(' ')[0]))
+                    if (match) {
+                      const params = new URLSearchParams({ with: match.id, name: match.name, role: 'seller' })
+                      navigate(`${msgPath}?${params}`)
+                    } else {
+                      navigate(msgPath)
+                    }
+                  } catch {
+                    navigate(msgPath)
+                  }
+                }}>✉️ Message</button>
+                <button className="btn btn-primary" onClick={() => navigate(`/browse?search=${encodeURIComponent(displayName)}`)}>View Gigs</button>
               </div>
             )}
           </div>

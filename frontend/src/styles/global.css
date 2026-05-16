@@ -132,19 +132,20 @@ select.form-control { cursor: pointer; }
 .section { padding: 80px 0; }
 
 /* ── NAVBAR ────────────────────────────────────────────────────────────────── */
-nav {
+.app-nav {
   position: fixed; top: 0; left: 0; right: 0; height: 64px; z-index: 200;
   background: var(--nav-bg); border-bottom: 1px solid var(--border);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  display: flex; align-items: center;
+  display: flex; align-items: center; padding: 0 24px;
 }
 
 /* ── SIDEBAR LAYOUT ─────────────────────────────────────────────────────────── */
 .portal-root {
-  display: flex; min-height: 100vh; padding-top: 64px;
+  display: flex; min-height: 100vh;
+  /* No padding-top — portal pages don't show the main navbar */
 }
 .sidebar {
-  position: fixed; top: 64px; left: 0; bottom: 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
   width: var(--sidebar-w); background: var(--card);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
@@ -185,13 +186,16 @@ nav {
 .portal-content {
   margin-left: var(--sidebar-w);
   flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  height: 100vh; overflow: hidden;
 }
 .portal-header {
   height: 56px; background: var(--card); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 28px; position: sticky; top: 64px; z-index: 50;
+  padding: 0 28px; position: sticky; top: 0; z-index: 50;
+  /* top: 0 because there is no fixed navbar in portal pages */
 }
-.portal-page { padding: 28px; }
+.portal-page { padding: 28px; flex: 1; overflow-y: auto; }
 .portal-page-title {
   font-size: 22px; font-weight: 800; color: var(--text);
   margin-bottom: 4px;
@@ -258,7 +262,7 @@ nav {
 .seller-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--brand); }
 
 /* ── CHAT ───────────────────────────────────────────────────────────────────── */
-.chat-root { display: flex; height: calc(100vh - 120px); min-height: 500px; }
+.chat-root { display: flex; flex: 1; min-height: 0; }
 .chat-list { width: 280px; border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; }
 .chat-list-item { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
 .chat-list-item:hover   { background: var(--brand-l); }
@@ -340,7 +344,7 @@ nav {
 @media (max-width: 768px) {
   .hamburger { display: flex; }
   .nav-links  { display: none !important; }
-  .sidebar    { transform: translateX(-100%); }
+  .sidebar    { transform: translateX(-100%); top: 0; }
   .sidebar.open { transform: translateX(0); }
   .portal-content { margin-left: 0; }
   .portal-page { padding: 16px; }

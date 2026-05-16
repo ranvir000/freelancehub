@@ -73,8 +73,12 @@ export default function AdminLayout() {
             <button onClick={() => setOpen(!open)} style={{ display:'none', background:'none', border:'none', color:'var(--text)', padding:4 }} className="sidebar-toggle">
               {open ? <X size={20}/> : <Menu size={20}/>}
             </button>
-            <Shield size={16} style={{color:'#f87171'}}/>
-            <span style={{ fontSize:13, color:'var(--muted)' }}>Admin Control Panel</span>
+            <div style={{ display:'flex', flexDirection:'column' }}>
+              <span style={{ fontSize:14, fontWeight:700, color:'var(--text)' }}>
+                Welcome back, <span style={{ color:'#f87171' }}>{user.name?.split(' ')[0]}</span> 👋
+              </span>
+              <span style={{ fontSize:11, color:'var(--muted)' }}>Admin Control Panel</span>
+            </div>
           </div>
           <span style={{ fontSize:12, background:'rgba(220,38,38,0.15)', color:'#f87171', padding:'4px 12px', borderRadius:20, fontWeight:700 }}>🔴 Admin Access</span>
         </div>

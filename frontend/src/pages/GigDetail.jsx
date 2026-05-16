@@ -53,12 +53,29 @@ export default function GigDetail() {
       await api.post('/api/orders/', { gig: gig.id, package: pkg, requirements: req, amount: selPkg.price })
       setOrdered(true)
       toast('Order placed successfully! 🎉')
-      setTimeout(() => navigate('/dashboard'), 1500)
+      const dashPath = user?.role === 'seller' ? '/seller/dashboard' : '/client/dashboard'
+      setTimeout(() => navigate(dashPath), 1500)
     } catch (err) {
-      // Bug fix: show real error instead of false success
       const msg = err.response?.data?.error || err.response?.data?.detail || 'Failed to place order. Please try again.'
       toast(msg, 'error')
     } finally { setOrdering(false) }
+  }
+
+  function contactSeller() {
+    if (!user) { navigate('/login'); return }
+    // gig.seller is the real DB integer PK (from API response)
+    // gig.seller_id is used for mock data only (e.g. 's1')
+    const realId = gig.seller   // integer from backend
+    const mockId = gig.seller_id // 's1' etc from mock fallback
+    const msgPath = user.role === 'seller' ? '/seller/messages' : '/client/messages';
+    
+    if (realId && typeof realId === 'number') {
+      const params = new URLSearchParams({ with: realId, name: gig.seller_name || 'Seller', role: 'seller' })
+      navigate(`${msgPath}?${params}`)
+    } else {
+      // Mock gig or no real ID — send to messages page, user can pick from seller list
+      navigate(msgPath)
+    }
   }
 
   if (!gig) return <div style={{padding:'80px',textAlign:'center',color:'var(--muted)'}}>Loading...</div>
@@ -72,7 +89,7 @@ export default function GigDetail() {
           <h1 style={{ fontSize:'clamp(1.2rem,3vw,1.8rem)', fontWeight:800, lineHeight:1.3, maxWidth:700, marginBottom:16, color:'var(--text)' }}>{gig.title}</h1>
           <div style={{ display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
             <div style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer' }}
-              onClick={() => navigate(`/profile/${gig.seller_id || 's1'}`)}>
+              onClick={() => navigate(`/profile/${gig.seller || gig.seller_id || 's1'}`)}>
               <div style={{ width:36, height:36, borderRadius:'50%', background:'var(--brand)', color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:12 }}>
                 {gig.seller_name?.slice(0,2).toUpperCase()}
               </div>
@@ -177,6 +194,14 @@ export default function GigDetail() {
               {ordering ? <><span className="spinner"/>Placing order...</> : `Order Now — ₹${Number(selPkg.price||0).toLocaleString()}`}
             </button>
           )}
+
+          <button
+            onClick={contactSeller}
+            className="btn btn-outline"
+            style={{ width:'100%', marginTop:10 }}
+          >
+            ✉️ Contact Seller
+          </button>
 
           <div style={{ marginTop:16, padding:14, background:'var(--brand-l)', borderRadius:10, fontSize:12, color:'var(--muted)', lineHeight:1.6 }}>
             🔒 <strong>Secure payment</strong> — Your payment is protected until you approve the delivered work

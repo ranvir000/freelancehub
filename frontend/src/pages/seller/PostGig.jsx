@@ -34,9 +34,25 @@ export default function SellerPostGig() {
   }
 
   const canNext = [
-    form.title.length>10 && form.description.length>30,
+    form.title.trim().length >= 5 && form.description.trim().length >= 10,
     form.price_basic && form.price_standard && form.price_premium,
     true,
+  ]
+
+  const stepHint = [
+    !form.title.trim().length
+      ? 'Enter a gig title to continue'
+      : form.title.trim().length < 5
+        ? `Title needs at least 5 characters (${form.title.trim().length}/5)`
+        : !form.description.trim().length
+          ? 'Add a description to continue'
+          : form.description.trim().length < 10
+            ? `Description needs at least 10 characters (${form.description.trim().length}/10)`
+            : '',
+    (!form.price_basic || !form.price_standard || !form.price_premium)
+      ? 'Fill in all three pricing packages to continue'
+      : '',
+    '',
   ]
 
   return (
@@ -130,18 +146,27 @@ export default function SellerPostGig() {
           )}
         </AnimatePresence>
 
-        <div style={{ display:'flex', gap:12, marginTop:32 }}>
-          {step>0 && <button onClick={()=>setStep(p=>p-1)} className="btn btn-ghost"><ChevronLeft size={15}/> Back</button>}
-          <div style={{ flex:1 }}/>
-          {step<STEPS.length-1 ? (
-            <button onClick={()=>setStep(p=>p+1)} className="btn btn-primary" disabled={!canNext[step]}>
-              Continue <ChevronRight size={15}/>
-            </button>
-          ) : (
-            <button onClick={submit} className="btn btn-primary" disabled={loading}>
-              {loading ? <><span className="spinner"/> Publishing...</> : '🚀 Publish Gig'}
-            </button>
+        <div style={{ marginTop:32 }}>
+          {/* Hint shown when Continue is disabled */}
+          {step < STEPS.length - 1 && !canNext[step] && stepHint[step] && (
+            <p style={{ fontSize:12, color:'var(--warning, #d97706)', marginBottom:10, display:'flex', alignItems:'center', gap:6 }}>
+              ⚠️ {stepHint[step]}
+            </p>
           )}
+          <div style={{ display:'flex', gap:12 }}>
+            {step>0 && <button onClick={()=>setStep(p=>p-1)} className="btn btn-ghost"><ChevronLeft size={15}/> Back</button>}
+            <div style={{ flex:1 }}/>
+            {step<STEPS.length-1 ? (
+              <button onClick={()=>setStep(p=>p+1)} className="btn btn-primary" disabled={!canNext[step]}
+                title={!canNext[step] ? stepHint[step] : ''}>
+                Continue <ChevronRight size={15}/>
+              </button>
+            ) : (
+              <button onClick={submit} className="btn btn-primary" disabled={loading}>
+                {loading ? <><span className="spinner"/> Publishing...</> : '🚀 Publish Gig'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

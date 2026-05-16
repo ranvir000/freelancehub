@@ -328,13 +328,13 @@ function Navbar() {
 
   return (
     <>
-      <nav style={{
+      <div className="app-nav" style={{
         background: isHome ? 'transparent' : 'var(--nav-bg)',
         borderBottom: isHome ? 'none' : '1px solid var(--border)',
-        padding: '0 24px', height: 64,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        position: isHome ? 'absolute' : 'sticky',
-        top: 0, left: 0, right: 0, zIndex: 100,
+        justifyContent: 'space-between',
+        position: isHome ? 'absolute' : 'fixed',
+        backdropFilter: isHome ? 'none' : 'blur(16px)',
+        WebkitBackdropFilter: isHome ? 'none' : 'blur(16px)',
       }}>
         <Link to="/" style={{ fontSize: 20, fontWeight: 800, color: isHome ? '#fff' : 'var(--brand)' }}>
           Freelance<span style={{ color: isHome ? '#a5b4fc' : 'var(--brand-d)' }}>Hub</span>
@@ -358,7 +358,7 @@ function Navbar() {
             <span /><span /><span />
           </button>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile dropdown */}
       <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
@@ -511,63 +511,72 @@ function DashboardRedirect() {
 // ── Page Transitions Wrapper ──────────────────────────────────────────────────
 function AnimatedRoutes() {
   const loc = useLocation()
-  const noNav = loc.pathname.startsWith('/client') || loc.pathname.startsWith('/seller') || loc.pathname.startsWith('/admin')
+  const isPortal = loc.pathname.startsWith('/client') || loc.pathname.startsWith('/seller') || loc.pathname.startsWith('/admin')
+  const isHome   = loc.pathname === '/'
+
+  // Portal pages: render layout directly — NO wrapper div, NO navbar
+  if (isPortal) {
+    return (
+      <Routes location={loc}>
+        {/* ── Client portal ── */}
+        <Route path="/client" element={<ClientLayout />}>
+          <Route index            element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<ClientDashboard />} />
+          <Route path="orders"    element={<ClientOrders />} />
+          <Route path="messages"  element={<ClientMessages />} />
+          <Route path="favourites"element={<ClientFavourites />} />
+          <Route path="settings"  element={<ClientSettings />} />
+        </Route>
+
+        {/* ── Seller portal ── */}
+        <Route path="/seller" element={<SellerLayout />}>
+          <Route index            element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<SellerDashboard />} />
+          <Route path="gigs"      element={<SellerGigs />} />
+          <Route path="gigs/new"  element={<SellerPostGig />} />
+          <Route path="orders"    element={<SellerOrders />} />
+          <Route path="earnings"  element={<SellerEarnings />} />
+          <Route path="messages"  element={<SellerMessages />} />
+          <Route path="settings"  element={<SellerSettings />} />
+        </Route>
+
+        {/* ── Admin portal ── */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index            element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users"     element={<AdminUsers />} />
+          <Route path="gigs"      element={<AdminGigs />} />
+          <Route path="orders"    element={<AdminOrders />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    )
+  }
+
+  // Public pages: show navbar + optional top padding
+  const needsNavOffset = !isHome
   return (
     <>
-      {!noNav && <Navbar />}
-      <AnimatePresence mode="wait">
-        <Routes location={loc} key={loc.pathname.split('/').slice(0,2).join('/')}>
-
-          {/* ── Public ── */}
-          <Route path="/"          element={<motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} exit={{opacity:0}}><Home /></motion.div>} />
-          <Route path="/browse"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Browse /></motion.div>} />
-          <Route path="/categories"element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Categories /></motion.div>} />
-          <Route path="/sellers"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Sellers /></motion.div>} />
-          <Route path="/about"     element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><About /></motion.div>} />
-          <Route path="/login"     element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Login /></motion.div>} />
-          <Route path="/register"  element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Register /></motion.div>} />
-          <Route path="/gig/:id"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><GigDetail /></motion.div>} />
-          <Route path="/profile/:id" element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><UserProfile /></motion.div>} />
-
-          {/* ── Dashboard redirect ── */}
-          <Route path="/dashboard" element={<DashboardRedirect />} />
-          <Route path="/post-gig"  element={<Navigate to="/seller/gigs/new" replace />} />
-          <Route path="/admin"     element={<Navigate to="/admin/dashboard" replace />} />
-
-          {/* ── Client portal ── */}
-          <Route path="/client" element={<ClientLayout />}>
-            <Route index            element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<ClientDashboard />} />
-            <Route path="orders"    element={<ClientOrders />} />
-            <Route path="messages"  element={<ClientMessages />} />
-            <Route path="favourites"element={<ClientFavourites />} />
-            <Route path="settings"  element={<ClientSettings />} />
-          </Route>
-
-          {/* ── Seller portal ── */}
-          <Route path="/seller" element={<SellerLayout />}>
-            <Route index            element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<SellerDashboard />} />
-            <Route path="gigs"      element={<SellerGigs />} />
-            <Route path="gigs/new"  element={<SellerPostGig />} />
-            <Route path="orders"    element={<SellerOrders />} />
-            <Route path="earnings"  element={<SellerEarnings />} />
-            <Route path="messages"  element={<SellerMessages />} />
-            <Route path="settings"  element={<SellerSettings />} />
-          </Route>
-
-          {/* ── Admin portal ── */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index            element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users"     element={<AdminUsers />} />
-            <Route path="gigs"      element={<AdminGigs />} />
-            <Route path="orders"    element={<AdminOrders />} />
-          </Route>
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AnimatePresence>
+      <Navbar />
+      <div style={needsNavOffset ? { paddingTop: 64 } : {}}>
+        <AnimatePresence mode="wait">
+          <Routes location={loc} key={loc.pathname}>
+            <Route path="/"           element={<motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} exit={{opacity:0}}><Home /></motion.div>} />
+            <Route path="/browse"     element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Browse /></motion.div>} />
+            <Route path="/categories" element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Categories /></motion.div>} />
+            <Route path="/sellers"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Sellers /></motion.div>} />
+            <Route path="/about"      element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><About /></motion.div>} />
+            <Route path="/login"      element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Login /></motion.div>} />
+            <Route path="/register"   element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Register /></motion.div>} />
+            <Route path="/gig/:id"    element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><GigDetail /></motion.div>} />
+            <Route path="/profile/:id"element={<motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><UserProfile /></motion.div>} />
+            <Route path="/dashboard"  element={<DashboardRedirect />} />
+            <Route path="/post-gig"   element={<Navigate to="/seller/gigs/new" replace />} />
+            <Route path="*"           element={<Navigate to="/" replace />} />
+          </Routes>
+        </AnimatePresence>
+      </div>
     </>
   )
 }

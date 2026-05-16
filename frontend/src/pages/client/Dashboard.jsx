@@ -45,7 +45,7 @@ export default function ClientDashboard() {
   return (
     <div className="portal-page">
       <h1 className="portal-page-title">Dashboard</h1>
-      <p className="portal-page-sub">Welcome back, {user.name?.split(' ')[0]}! Here's your overview.</p>
+      <p className="portal-page-sub">Here's your activity overview</p>
 
       {/* Stats */}
       <div className="stats-grid">
