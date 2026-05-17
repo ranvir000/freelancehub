@@ -99,9 +99,8 @@ class SellerListView(APIView):
 
 class GigListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
     def get(self, request):
-        qs = Gig.objects.filter(is_active=True)
+        qs = Gig.objects.filter(is_active=True).select_related('seller')
         cat      = request.query_params.get('category')
         search   = request.query_params.get('search')
         seller   = request.query_params.get('seller')
@@ -162,7 +161,7 @@ class OrderListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        qs = Order.objects.filter(Q(buyer=request.user) | Q(seller=request.user))
+        qs = Order.objects.filter(Q(buyer=request.user) | Q(seller=request.user)).select_related('buyer', 'seller', 'gig')
         return Response(OrderSerializer(qs, many=True).data)
 
     def post(self, request):
