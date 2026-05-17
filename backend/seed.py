@@ -13,7 +13,7 @@ print("Seeding FreelanceHub database...")
 # ── USERS ──────────────────────────────────────────────────────────────────
 USERS = [
     dict(username='ranvir',  first_name='Ranvir', last_name='Singh',  email='ranvir@gmail.com',  role='seller', password='demo1234', bio='Full-stack developer specializing in React, Django, and cloud solutions.', skills='React,Django,PostgreSQL,AWS', location='Mumbai, India', hourly_rate=2500),
-    dict(username='priya',   first_name='Priya',  last_name='Kapoor', email='priya@gmail.com',   role='seller', password='demo1234', bio='Brand designer and UI/UX specialist with 7 years creating stunning visuals.', skills='Figma,Branding,Logo Design,Illustration', location='Delhi, India', hourly_rate=1800),
+    dict(username='sneha',   first_name='Sneha',  last_name='Reddy',  email='sneha@gmail.com',   role='seller', password='demo1234', bio='Brand designer and UI/UX specialist with 7 years creating stunning visuals.', skills='Figma,Branding,Logo Design,Illustration', location='Delhi, India', hourly_rate=1800),
     dict(username='sara',    first_name='Sara',   last_name='Liu',    email='sara@gmail.com',    role='seller', password='demo1234', bio='Professional content writer with expertise in SEO and technical writing.', skills='Blog Writing,SEO,Copywriting,Research', location='Bangalore, India', hourly_rate=1200),
     dict(username='arjun',   first_name='Arjun',  last_name='Patel',  email='arjun@gmail.com',   role='seller', password='demo1234', bio='Video producer and editor creating engaging content for YouTube and social media.', skills='Premiere Pro,After Effects,Color Grading,Motion Graphics', location='Hyderabad, India', hourly_rate=2000),
     dict(username='kiran',   first_name='Kiran',  last_name='Mehta',  email='kiran@gmail.com',   role='seller', password='demo1234', bio='Digital marketing expert growing brands through paid ads, SEO, and content.', skills='Google Ads,Facebook Ads,SEO,Analytics', location='Pune, India', hourly_rate=1500),
@@ -37,7 +37,7 @@ for u in USERS:
         print(f"  -- Skipped (exists): {u['username']}")
 
 ranvir  = created['ranvir']
-priya   = created['priya']
+sneha   = created['sneha']
 sara    = created['sara']
 arjun   = created['arjun']
 kiran   = created['kiran']
@@ -53,10 +53,10 @@ GIGS = [
     dict(seller=ranvir, title='I will build a full-stack web app with React and Django', description='Complete web app with JWT auth, REST API, PostgreSQL database, admin panel, and responsive React frontend. Source code included.', category='Development', price_basic=2499, price_standard=4999, price_premium=8999, delivery_basic=7, delivery_standard=14, delivery_premium=21, rating=4.9, review_count=48, orders_completed=48),
     dict(seller=ranvir, title='I will build a REST API with Django and PostgreSQL', description='Robust REST API with Django REST Framework. Includes JWT auth, filtering, pagination, and Swagger documentation.', category='Development', price_basic=1999, price_standard=3999, price_premium=6999, delivery_basic=5, delivery_standard=10, delivery_premium=18, rating=5.0, review_count=32, orders_completed=32),
     dict(seller=ranvir, title='I will create a responsive landing page using React', description='Fast, responsive, and SEO-friendly landing page with modern design patterns and smooth animations.', category='Development', price_basic=999, price_standard=1999, price_premium=2999, delivery_basic=3, delivery_standard=5, delivery_premium=7, rating=4.8, review_count=15, orders_completed=15),
-    # Priya — Design (index 3,4,5)
-    dict(seller=priya,  title='I will design a modern logo for your brand', description='Professional logo with 3 unique concepts, vector files (AI, SVG, PNG), brand kit, and commercial rights. Fast delivery guaranteed.', category='Design', price_basic=999, price_standard=1999, price_premium=3999, delivery_basic=3, delivery_standard=5, delivery_premium=10, rating=4.8, review_count=128, orders_completed=128),
-    dict(seller=priya,  title='I will design a stunning UI/UX for your app', description='Complete UI/UX design in Figma — wireframes, high-fidelity mockups, prototype, and design system. Dark mode included.', category='Design', price_basic=1499, price_standard=2999, price_premium=5499, delivery_basic=4, delivery_standard=8, delivery_premium=15, rating=4.8, review_count=76, orders_completed=76),
-    dict(seller=priya,  title='I will create social media graphics for your campaign', description='Custom, highly engaging posts for Instagram, Facebook, and Twitter. Includes source files and unlimited revisions.', category='Design', price_basic=499, price_standard=999, price_premium=1999, delivery_basic=2, delivery_standard=4, delivery_premium=7, rating=4.9, review_count=45, orders_completed=45),
+    # Sneha — Design (index 3,4,5)
+    dict(seller=sneha,  title='I will design a modern logo for your brand', description='Professional logo with 3 unique concepts, vector files (AI, SVG, PNG), brand kit, and commercial rights. Fast delivery guaranteed.', category='Design', price_basic=999, price_standard=1999, price_premium=3999, delivery_basic=3, delivery_standard=5, delivery_premium=10, rating=4.8, review_count=128, orders_completed=128),
+    dict(seller=sneha,  title='I will design a stunning UI/UX for your app', description='Complete UI/UX design in Figma — wireframes, high-fidelity mockups, prototype, and design system. Dark mode included.', category='Design', price_basic=1499, price_standard=2999, price_premium=5499, delivery_basic=4, delivery_standard=8, delivery_premium=15, rating=4.8, review_count=76, orders_completed=76),
+    dict(seller=sneha,  title='I will create social media graphics for your campaign', description='Custom, highly engaging posts for Instagram, Facebook, and Twitter. Includes source files and unlimited revisions.', category='Design', price_basic=499, price_standard=999, price_premium=1999, delivery_basic=2, delivery_standard=4, delivery_premium=7, rating=4.9, review_count=45, orders_completed=45),
     # Sara — Writing (index 6,7,8)
     dict(seller=sara,   title='I will write SEO-optimized blog posts for your website', description='Professional content writing with keyword research, meta descriptions, and plagiarism-free articles that rank on Google.', category='Writing', price_basic=499, price_standard=999, price_premium=1999, delivery_basic=2, delivery_standard=4, delivery_premium=7, rating=4.9, review_count=203, orders_completed=203),
     dict(seller=sara,   title='I will craft compelling ad copy for Facebook and Google', description='High-converting ad copy that drives clicks and sales. Perfect for e-commerce, software, or local businesses.', category='Writing', price_basic=299, price_standard=599, price_premium=999, delivery_basic=1, delivery_standard=3, delivery_premium=5, rating=4.7, review_count=60, orders_completed=60),
@@ -112,12 +112,12 @@ g_email    = G['I will set up email marketing automation']
 ORDERS_DATA = [
     # ── ALEX (buyer) ──
     dict(buyer=alex, seller=ranvir, gig=g_webapp,  package='standard', amount=4999, status='completed',   requirements='Build a freelancing marketplace with buyer and seller roles, JWT auth, and Stripe payments.'),
-    dict(buyer=alex, seller=priya,  gig=g_logo,    package='basic',    amount=999,  status='completed',   requirements='Logo for my new tech startup. Modern, minimal, blue palette preferred.'),
+    dict(buyer=alex, seller=sneha,  gig=g_logo,    package='basic',    amount=999,  status='completed',   requirements='Logo for my new tech startup. Modern, minimal, blue palette preferred.'),
     dict(buyer=alex, seller=sara,   gig=g_blog,    package='standard', amount=999,  status='delivered',   requirements='5 SEO blog posts on AI and machine learning trends for 2025.'),
     dict(buyer=alex, seller=kiran,  gig=g_smm,     package='basic',    amount=1499, status='in_progress', requirements='Manage my Instagram and LinkedIn pages for the next month.'),
 
     # ── JAMES (buyer) ──
-    dict(buyer=james, seller=priya,  gig=g_uiux,   package='standard', amount=2999, status='completed',   requirements='UI/UX redesign for my restaurant booking app. Dark mode is a must.'),
+    dict(buyer=james, seller=sneha,  gig=g_uiux,   package='standard', amount=2999, status='completed',   requirements='UI/UX redesign for my restaurant booking app. Dark mode is a must.'),
     dict(buyer=james, seller=arjun,  gig=g_promo,  package='basic',    amount=1999, status='delivered',   requirements='Promo video for my new mobile app launch. Upbeat music, 60 seconds.'),
     dict(buyer=james, seller=ranvir, gig=g_api,    package='basic',    amount=1999, status='in_progress', requirements='REST API for my mobile app — user auth, product listing, and order management.'),
 
@@ -127,7 +127,7 @@ ORDERS_DATA = [
     dict(buyer=david, seller=arjun,  gig=g_youtube, package='basic',    amount=899,  status='pending',     requirements='Edit my 20-minute YouTube tutorial on Python Django. Add intro/outro.'),
 
     # ── EMILY (buyer) ──
-    dict(buyer=emily, seller=priya,  gig=g_social,  package='premium',  amount=1999, status='completed',   requirements='Social media graphics kit for my fashion brand — 15 posts for Instagram.'),
+    dict(buyer=emily, seller=sneha,  gig=g_social,  package='premium',  amount=1999, status='completed',   requirements='Social media graphics kit for my fashion brand — 15 posts for Instagram.'),
     dict(buyer=emily, seller=sara,   gig=g_press,   package='basic',    amount=799,  status='delivered',   requirements='Press release for our startup funding announcement round A.'),
     dict(buyer=emily, seller=kiran,  gig=g_seo,     package='standard', amount=999,  status='pending',     requirements='Keyword research for our beauty and skincare blog targeting India and UAE.'),
 
@@ -137,9 +137,12 @@ ORDERS_DATA = [
     dict(buyer=michael, seller=kiran,  gig=g_email,   package='standard', amount=1999, status='in_progress', requirements='Set up welcome and drip email sequences in Mailchimp for my SaaS app.'),
 ]
 
+import random
+from django.utils import timezone
+from datetime import timedelta, datetime
+
 order_objects = []
 for o in ORDERS_DATA:
-    key = (o['buyer'].id, o['gig'].id)
     if not Order.objects.filter(buyer=o['buyer'], gig=o['gig']).exists():
         order = Order.objects.create(**o)
         order_objects.append(order)
@@ -149,13 +152,31 @@ for o in ORDERS_DATA:
         order_objects.append(order)
         print(f"  -- Skipped order (exists): {o['buyer'].first_name} -> {o['gig'].title[:30]}")
 
+    # Set custom dates using .update() to bypass auto_now
+    start_date = timezone.now() - timedelta(days=random.randint(10, 15))
+    
+    # Randomize completion date between 16-20 May for variety, heavily weighted to 18-20 May
+    # If the current month is May 2026, this is perfect. 
+    # Otherwise we'll just use a relative future date if today isn't May.
+    day = random.choice([16, 17, 18, 19, 19, 20, 20])
+    
+    # We will just construct a datetime for May 2026
+    # Make sure to make it aware
+    dt = datetime(2026, 5, day, random.randint(9, 18), random.randint(0, 59))
+    completion_date = timezone.make_aware(dt)
+    
+    if order.status in ['completed', 'delivered']:
+        Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+    else:
+        Order.objects.filter(id=order.id).update(created_at=start_date)
+
 # ── REVIEWS (only on completed orders) ─────────────────────────────────────
 REVIEWS_DATA = [
     dict(order_idx=0,  buyer=alex,    seller=ranvir, gig=g_webapp,  rating=5, comment='Ranvir delivered an exceptional full-stack app. Clean code, great communication, and delivered ahead of schedule!'),
-    dict(order_idx=1,  buyer=alex,    seller=priya,  gig=g_logo,   rating=5, comment='Priya nailed the logo on the first try. Professional, modern, and exactly what I envisioned.'),
-    dict(order_idx=4,  buyer=james,   seller=priya,  gig=g_uiux,   rating=5, comment='Outstanding UI/UX work! The Figma prototype was incredibly detailed and the dark mode looks stunning.'),
+    dict(order_idx=1,  buyer=alex,    seller=sneha,  gig=g_logo,   rating=5, comment='Sneha nailed the logo on the first try. Professional, modern, and exactly what I envisioned.'),
+    dict(order_idx=4,  buyer=james,   seller=sneha,  gig=g_uiux,   rating=5, comment='Outstanding UI/UX work! The Figma prototype was incredibly detailed and the dark mode looks stunning.'),
     dict(order_idx=7,  buyer=david,   seller=sara,   gig=g_adcopy, rating=4, comment='Great ad copy, really captures our product well. High-converting and delivered on time.'),
-    dict(order_idx=10, buyer=emily,   seller=priya,  gig=g_social, rating=5, comment='Absolutely love the graphics! Every post looks premium. Got 3x more engagement this month.'),
+    dict(order_idx=10, buyer=emily,   seller=sneha,  gig=g_social, rating=5, comment='Absolutely love the graphics! Every post looks premium. Got 3x more engagement this month.'),
     dict(order_idx=13, buyer=michael, seller=ranvir, gig=g_landing, rating=5, comment='The landing page looks stunning and loads super fast. Conversions are up 40% since launch!'),
     dict(order_idx=14, buyer=michael, seller=arjun,  gig=g_captions, rating=5, comment='Fast turnaround and perfect sync. My TikTok engagement doubled after adding captions!'),
 ]
@@ -178,10 +199,10 @@ MESSAGES_DATA = [
     dict(sender=alex,    receiver=ranvir, content='Perfect. Please make sure the admin panel is included as discussed.'),
     dict(sender=ranvir,  receiver=alex,   content='Absolutely! Admin panel with user management, gig moderation, and order tracking is included.'),
 
-    dict(sender=james,   receiver=priya,  content='Priya, can you show me a preview of the UI/UX design before final delivery?'),
-    dict(sender=priya,   receiver=james,  content='Of course! I have attached a Figma prototype link. Please check and share feedback.'),
-    dict(sender=james,   receiver=priya,  content='Looks amazing! Just a small change — can you make the CTA button more prominent?'),
-    dict(sender=priya,   receiver=james,  content='Done! Updated the CTA with a gradient style and larger font. Let me know if this works!'),
+    dict(sender=james,   receiver=sneha,  content='Sneha, can you show me a preview of the UI/UX design before final delivery?'),
+    dict(sender=sneha,   receiver=james,  content='Of course! I have attached a Figma prototype link. Please check and share feedback.'),
+    dict(sender=james,   receiver=sneha,  content='Looks amazing! Just a small change — can you make the CTA button more prominent?'),
+    dict(sender=sneha,   receiver=james,  content='Done! Updated the CTA with a gradient style and larger font. Let me know if this works!'),
 
     dict(sender=emily,   receiver=sara,   content='Sara, can you include a media contact list with the press release?'),
     dict(sender=sara,    receiver=emily,  content='Sure Emily! I will add a curated list of 20 Indian tech journalists and editors. Delivering tomorrow.'),
@@ -194,8 +215,9 @@ MESSAGES_DATA = [
 ]
 
 for m in MESSAGES_DATA:
-    Message.objects.create(**m)
-print(f"  OK Messages: {len(MESSAGES_DATA)} messages created")
+    if not Message.objects.filter(sender=m['sender'], receiver=m['receiver'], content=m['content']).exists():
+        Message.objects.create(**m)
+print(f"  OK Messages: Ensured unique messages created")
 
 # ── FAVOURITES ──────────────────────────────────────────────────────────────
 FAV_DATA = [
@@ -224,7 +246,7 @@ print("   7 reviews on completed orders")
 print("  14 messages across conversations")
 print("   9 favourites")
 print("\nLogin credentials:")
-print("  Sellers: ranvir/priya/sara/arjun/kiran  -> demo1234")
+print("  Sellers: ranvir/sneha/sara/arjun/kiran  -> demo1234")
 print("  Buyers:  alex/james/david/emily/michael -> demo1234")
 print("  Admin:   admin                          -> admin1234")
 print("="*55)

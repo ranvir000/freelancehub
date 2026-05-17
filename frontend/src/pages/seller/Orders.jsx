@@ -64,7 +64,10 @@ export default function SellerOrders() {
                     <span>Buyer: {o.buyer_name}</span>
                     <span>Package: {o.package}</span>
                     <span>Amount: <strong style={{color:'var(--brand)'}}>₹{Number(o.amount).toLocaleString()}</strong></span>
-                    <span>{o.created_at?.slice(0,10)}</span>
+                    <span>Start: {o.created_at?.slice(0,10)}</span>
+                    {o.updated_at && ['completed', 'delivered'].includes(o.status) && (
+                      <span>Completed: {o.updated_at?.slice(0,10)}</span>
+                    )}
                   </div>
                 </div>
                 <div style={{display:'flex',gap:8,flexShrink:0,flexWrap:'wrap'}}>

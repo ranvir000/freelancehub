@@ -103,7 +103,10 @@ export default function ClientOrders() {
                   <span>Seller: {order.seller_name}</span>
                   <span>Package: {order.package}</span>
                   <span>Amount: <strong style={{color:'var(--brand)'}}>₹{Number(order.amount).toLocaleString()}</strong></span>
-                  <span>{order.created_at?.slice(0,10)}</span>
+                  <span>Start: {order.created_at?.slice(0,10)}</span>
+                  {order.updated_at && ['completed', 'delivered'].includes(order.status) && (
+                    <span>Completed: {order.updated_at?.slice(0,10)}</span>
+                  )}
                 </div>
                 {/* Timeline */}
                 {order.status !== 'cancelled' && (
