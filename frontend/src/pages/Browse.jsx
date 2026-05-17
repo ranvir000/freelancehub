@@ -12,6 +12,12 @@ const SORTS = [
   { value:'price_basic',      label:'Price: Low to High' },
   { value:'-price_basic',     label:'Price: High to Low' },
 ]
+
+export default function Browse() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [params, setParams] = useSearchParams()
+
   const [gigs,    setGigs]    = useState([])
   const [loading, setLoading] = useState(true)
   const [favIds,  setFavIds]  = useState([])
