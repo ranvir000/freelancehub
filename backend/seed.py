@@ -155,10 +155,8 @@ for o in ORDERS_DATA:
     # Set custom dates using .update() to bypass auto_now
     start_date = timezone.now() - timedelta(days=random.randint(10, 15))
     
-    # Randomize completion date between 16-20 May for variety, heavily weighted to 18-20 May
-    # If the current month is May 2026, this is perfect. 
-    # Otherwise we'll just use a relative future date if today isn't May.
-    day = random.choice([16, 17, 18, 19, 19, 20, 20])
+    # Randomize completion date to be in the past, e.g. May 10-16
+    day = random.choice([10, 11, 12, 13, 14, 15, 16])
     
     # We will just construct a datetime for May 2026
     # Make sure to make it aware

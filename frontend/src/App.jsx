@@ -544,7 +544,9 @@ function DashboardRedirect() {
 // ── Page Transitions Wrapper ──────────────────────────────────────────────────
 function AnimatedRoutes() {
   const loc = useLocation()
-  const isPortal = loc.pathname.startsWith('/client') || loc.pathname.startsWith('/seller') || loc.pathname.startsWith('/admin')
+  const isPortal = loc.pathname.startsWith('/client/') || loc.pathname === '/client' ||
+                   loc.pathname.startsWith('/seller/') || loc.pathname === '/seller' ||
+                   loc.pathname.startsWith('/admin/')  || loc.pathname === '/admin'
   const isHome   = loc.pathname === '/'
 
   // Portal pages: render layout directly — NO wrapper div, NO navbar
