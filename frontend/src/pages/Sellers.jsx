@@ -90,7 +90,13 @@ export default function Sellers() {
                       <span key={sk} style={{ background:'var(--brand-l)', color:'var(--brand)', padding:'2px 10px', borderRadius:12, fontSize:11, fontWeight:600 }}>{sk}</span>
                     ))}
                   </div>
-                  <button className="btn btn-outline" style={{ width:'100%', marginTop:16, fontSize:13 }}>View Profile</button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ width:'100%', marginTop:16, fontSize:13 }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/profile/${s.id}`); }}
+                  >
+                    View Profile
+                  </button>
                 </div>
               )
             })}

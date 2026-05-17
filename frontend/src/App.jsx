@@ -417,6 +417,14 @@ const SUPPORT_REPLIES = [
   "That's been noted. Is there anything else I can help you with today? 😊",
 ]
 
+const SUPPORT_REPLIES = [
+  "Thanks for reaching out! We'll look into this.",
+  "Our support team is currently reviewing your request.",
+  "Could you provide a bit more detail?",
+  "We've updated your account accordingly.",
+  "Please let us know if you need anything else!"
+]
+
 function ChatWidget() {
   const { user } = useAuth()
   const loc      = useLocation()

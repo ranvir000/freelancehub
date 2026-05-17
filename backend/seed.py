@@ -250,20 +250,24 @@ print(f"  OK Favourites: {len(FAV_DATA)} saved")
 if Order.objects.count() < 30:
     print("Generating balanced random orders for realistic history...")
     buyers_list = [alex, james, david, emily, michael]
-    gigs_list = list(Gig.objects.all())
+    sellers_list = [ranvir, sneha, sara, arjun, kiran]
     packages = ['basic', 'standard', 'premium']
     
-    # Generate 2-3 extra orders per gig to avoid clumping
-    for gig in gigs_list:
-        num_orders = random.randint(2, 3)
+    # Generate 3-4 extra orders per seller total (across their gigs)
+    for seller in sellers_list:
+        seller_gigs = list(Gig.objects.filter(seller=seller))
+        if not seller_gigs: continue
+        
+        num_orders = random.randint(3, 4)
         for _ in range(num_orders):
             buyer = random.choice(buyers_list)
+            gig = random.choice(seller_gigs)
             pkg = random.choice(packages)
             status = random.choice(['completed', 'completed', 'delivered', 'in_progress', 'pending'])
             amount = getattr(gig, f'price_{pkg}')
             
             order = Order.objects.create(
-                buyer=buyer, seller=gig.seller, gig=gig,
+                buyer=buyer, seller=seller, gig=gig,
                 package=pkg, status=status, amount=amount,
                 requirements='Randomly generated requirements for this order.'
             )

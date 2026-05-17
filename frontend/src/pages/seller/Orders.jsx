@@ -16,16 +16,35 @@ export default function SellerOrders() {
   const toast      = useToast()
   const [orders,   setOrders]  = useState([])
   const [loading,  setLoading] = useState(true)
+  const [processing, setProcessing] = useState(null)
   const [tab,      setTab]     = useState('all')
 
   useEffect(() => {
     api.get('/api/orders/').then(r=>setOrders(r.data.filter(o=>o.seller===user.id))).catch(()=>{}).finally(()=>setLoading(false))
   }, [user.id])
 
-  async function update(id, status) {
-    try { await api.patch(`/api/orders/${id}/`, { status }) } catch {}
-    setOrders(p => p.map(o => o.id===id ? {...o, status} : o))
+  async function update(order, status) {
+    setProcessing(order.id)
+    
+    let msg = ''
+    if (status === 'accepted') msg = `Hi ${order.buyer_name.split(' ')[0]}, I have accepted your order for "${order.gig_title}". I will begin working on it shortly!`
+    if (status === 'in_progress') msg = `Update: I have started working on your order. I will keep you posted!`
+    if (status === 'delivered') msg = `Great news! I have delivered the final files for "${order.gig_title}". Please review it when you have a moment.`
+    if (status === 'cancelled') msg = `I'm sorry, but I have to decline this order at this time.`
+
+    // Simulated realistic processing delay (2-3s) to prevent rapid clicking
+    await new Promise(r => setTimeout(r, 2000 + Math.random() * 1000))
+    
+    try { 
+      await api.patch(`/api/orders/${order.id}/`, { status })
+      if (msg) {
+        await api.post('/api/messages/', { receiver: order.buyer, content: msg, order: order.id }).catch(()=>{})
+      }
+    } catch {}
+    
+    setOrders(p => p.map(o => o.id===order.id ? {...o, status} : o))
     toast(`Order marked as ${status} ✅`)
+    setProcessing(null)
   }
 
   const filtered = tab==='all' ? orders : orders.filter(o=>o.status===tab)
@@ -86,11 +105,12 @@ export default function SellerOrders() {
                     </div>
                   )}
                 </div>
-                <div style={{display:'flex',gap:8,flexShrink:0,flexWrap:'wrap'}}>
-                  {o.status==='pending'     && <button className="btn btn-primary btn-sm" onClick={()=>update(o.id,'accepted')}>Accept</button>}
-                  {o.status==='accepted'    && <button className="btn btn-primary btn-sm" onClick={()=>update(o.id,'in_progress')}>Start Work</button>}
-                  {o.status==='in_progress' && <button className="btn btn-success btn-sm" onClick={()=>update(o.id,'delivered')}>Mark Delivered ✓</button>}
-                  {o.status==='pending'     && <button className="btn btn-ghost btn-sm" style={{color:'var(--danger)'}} onClick={()=>update(o.id,'cancelled')}>Decline</button>}
+                <div style={{display:'flex',gap:8,flexShrink:0,flexWrap:'wrap',alignItems:'center'}}>
+                  {processing === o.id && <span style={{fontSize:12,color:'var(--muted)',fontWeight:600,animation:'pulse 1.5s infinite'}}>Updating...</span>}
+                  {o.status==='pending'     && <button className="btn btn-primary btn-sm" disabled={processing===o.id} onClick={()=>update(o,'accepted')}>Accept</button>}
+                  {o.status==='accepted'    && <button className="btn btn-primary btn-sm" disabled={processing===o.id} onClick={()=>update(o,'in_progress')}>Start Work</button>}
+                  {o.status==='in_progress' && <button className="btn btn-success btn-sm" disabled={processing===o.id} onClick={()=>update(o,'delivered')}>Mark Delivered ✓</button>}
+                  {o.status==='pending'     && <button className="btn btn-ghost btn-sm" disabled={processing===o.id} style={{color:'var(--danger)'}} onClick={()=>update(o,'cancelled')}>Decline</button>}
                 </div>
               </div>
             </div>

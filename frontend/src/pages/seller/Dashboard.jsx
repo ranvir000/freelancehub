@@ -12,6 +12,7 @@ export default function SellerDashboard() {
   const [gigs,     setGigs]     = useState([])
   const [reviews,  setReviews]  = useState([])
   const [loading,  setLoading]  = useState(true)
+  const [processing, setProcessing] = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -25,10 +26,27 @@ export default function SellerDashboard() {
     }).finally(()=>setLoading(false))
   }, [user.id])
 
-  async function updateStatus(id, status) {
-    try { await api.patch(`/api/orders/${id}/`, { status }) } catch {}
-    setOrders(p => p.map(o => o.id===id ? {...o, status} : o))
+  async function updateStatus(order, status) {
+    setProcessing(order.id)
+    
+    let msg = ''
+    if (status === 'accepted') msg = `Hi ${order.buyer_name.split(' ')[0]}, I have accepted your order for "${order.gig_title}". I will begin working on it shortly!`
+    if (status === 'in_progress') msg = `Update: I have started working on your order. I will keep you posted!`
+    if (status === 'delivered') msg = `Great news! I have delivered the final files for "${order.gig_title}". Please review it when you have a moment.`
+
+    // Simulated realistic processing delay (2-3s) to prevent rapid clicking
+    await new Promise(r => setTimeout(r, 2000 + Math.random() * 1000))
+    
+    try {
+      await api.patch(`/api/orders/${order.id}/`, { status })
+      if (msg) {
+        await api.post('/api/messages/', { receiver: order.buyer, content: msg, order: order.id }).catch(()=>{})
+      }
+    } catch {}
+    
+    setOrders(p => p.map(o => o.id===order.id ? {...o, status} : o))
     toast(`Order ${status} ✅`)
+    setProcessing(null)
   }
 
   const completed  = orders.filter(o=>['completed','delivered'].includes(o.status))
@@ -126,10 +144,11 @@ export default function SellerDashboard() {
               <p style={{ fontSize:13, fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{o.gig_title}</p>
               <p style={{ fontSize:11, color:'var(--muted)' }}>Buyer: {o.buyer_name} · ₹{Number(o.amount).toLocaleString()}</p>
             </div>
-            <div style={{ display:'flex', gap:8, flexShrink:0 }}>
-              {o.status==='pending'     && <button className="btn btn-primary btn-sm" onClick={()=>updateStatus(o.id,'accepted')}>Accept</button>}
-              {o.status==='accepted'    && <button className="btn btn-primary btn-sm" onClick={()=>updateStatus(o.id,'in_progress')}>Start</button>}
-              {o.status==='in_progress' && <button className="btn btn-success btn-sm" onClick={()=>updateStatus(o.id,'delivered')}>Deliver</button>}
+            <div style={{ display:'flex', gap:8, flexShrink:0, alignItems:'center' }}>
+              {processing === o.id && <span style={{fontSize:12,color:'var(--muted)',fontWeight:600,animation:'pulse 1.5s infinite'}}>Updating...</span>}
+              {o.status==='pending'     && <button className="btn btn-primary btn-sm" disabled={processing===o.id} onClick={()=>updateStatus(o,'accepted')}>Accept</button>}
+              {o.status==='accepted'    && <button className="btn btn-primary btn-sm" disabled={processing===o.id} onClick={()=>updateStatus(o,'in_progress')}>Start</button>}
+              {o.status==='in_progress' && <button className="btn btn-success btn-sm" disabled={processing===o.id} onClick={()=>updateStatus(o,'delivered')}>Deliver</button>}
             </div>
           </div>
         ))}
