@@ -52,6 +52,8 @@ export default function SellerOrders() {
           </div>
         ) : filtered.map(o=>{
           const s = ST[o.status]||ST.pending
+          const timeline = ['pending','accepted','in_progress','delivered','completed']
+          const step = timeline.indexOf(o.status)
           return (
             <div key={o.id} className="card" style={{padding:20,marginBottom:12}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,flexWrap:'wrap'}}>
@@ -69,6 +71,20 @@ export default function SellerOrders() {
                       <span>Completed: {o.updated_at?.slice(0,10)}</span>
                     )}
                   </div>
+                  {/* Timeline */}
+                  {o.status !== 'cancelled' && (
+                    <div style={{ display:'flex', alignItems:'center', gap:0, marginTop:16 }}>
+                      {timeline.map((s_name, i) => (
+                        <React.Fragment key={s_name}>
+                          <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
+                            <div style={{ width:24, height:24, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, background: i<=step ? 'var(--brand)' : 'var(--surface)', color: i<=step ? '#fff' : 'var(--muted)', border:`2px solid ${i<=step ? 'var(--brand)' : 'var(--border)'}`, transition:'all 0.3s' }}>{i<step ? '✓' : i+1}</div>
+                            <span style={{ fontSize:9, color: i<=step ? 'var(--brand)' : 'var(--muted)', marginTop:4, whiteSpace:'nowrap', fontWeight: i===step ? 700:400 }}>{s_name.replace('_',' ')}</span>
+                          </div>
+                          {i < timeline.length-1 && <div style={{ flex:1, height:2, background: i<step ? 'var(--brand)' : 'var(--border)', transition:'all 0.3s', minWidth:20 }}/>}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div style={{display:'flex',gap:8,flexShrink:0,flexWrap:'wrap'}}>
                   {o.status==='pending'     && <button className="btn btn-primary btn-sm" onClick={()=>update(o.id,'accepted')}>Accept</button>}

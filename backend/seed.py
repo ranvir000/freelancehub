@@ -152,20 +152,31 @@ for o in ORDERS_DATA:
         order_objects.append(order)
         print(f"  -- Skipped order (exists): {o['buyer'].first_name} -> {o['gig'].title[:30]}")
 
-    # Set custom dates using .update() to bypass auto_now
-    start_date = timezone.now() - timedelta(days=random.randint(10, 15))
+    # Strict Timeline Logic based on delivery days
+    delivery_days = getattr(order.gig, f'delivery_{order.package}')
     
-    # Randomize completion date to be in the past, e.g. May 10-16
-    day = random.choice([10, 11, 12, 13, 14, 15, 16])
-    
-    # We will just construct a datetime for May 2026
-    # Make sure to make it aware
-    dt = datetime(2026, 5, day, random.randint(9, 18), random.randint(0, 59))
-    completion_date = timezone.make_aware(dt)
-    
-    if order.status in ['completed', 'delivered']:
+    if order.status == 'completed':
+        # Finished exactly delivery_days + 1 days after start, randomly in the past 6 months
+        days_ago = random.randint(delivery_days + 5, 180)
+        start_date = timezone.now() - timedelta(days=days_ago)
+        completion_date = start_date + timedelta(days=delivery_days + 1)
         Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+        
+    elif order.status == 'delivered':
+        # Finished recently (0-1 days ago), started exactly delivery_days + 1 days ago
+        start_date = timezone.now() - timedelta(days=delivery_days + 1)
+        completion_date = timezone.now() - timedelta(days=random.randint(0, 1))
+        Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+        
+    elif order.status in ['in_progress', 'accepted']:
+        # Started between 2 and delivery_days days ago
+        days_ago = random.randint(2, max(2, delivery_days - 1))
+        start_date = timezone.now() - timedelta(days=days_ago)
+        Order.objects.filter(id=order.id).update(created_at=start_date)
+        
     else:
+        # Pending: started 0-1 days ago
+        start_date = timezone.now() - timedelta(days=random.randint(0, 1))
         Order.objects.filter(id=order.id).update(created_at=start_date)
 
 # ── REVIEWS (only on completed orders) ─────────────────────────────────────
@@ -237,44 +248,58 @@ print(f"  OK Favourites: {len(FAV_DATA)} saved")
 
 # ── RANDOM EXTRA ORDERS ───────────────────────────────────────────────────
 if Order.objects.count() < 30:
-    print("Generating 40 random orders for realistic history...")
+    print("Generating balanced random orders for realistic history...")
     buyers_list = [alex, james, david, emily, michael]
     gigs_list = list(Gig.objects.all())
     packages = ['basic', 'standard', 'premium']
-    statuses = ['completed', 'completed', 'completed', 'delivered', 'in_progress', 'pending']
     
-    for _ in range(40):
-        buyer = random.choice(buyers_list)
-        gig = random.choice(gigs_list)
-        pkg = random.choice(packages)
-        status = random.choice(statuses)
-        amount = getattr(gig, f'price_{pkg}')
-        
-        order = Order.objects.create(
-            buyer=buyer,
-            seller=gig.seller,
-            gig=gig,
-            package=pkg,
-            status=status,
-            amount=amount,
-            requirements='Randomly generated requirements for this order.'
-        )
-        
-        # Generate past dates
-        days_ago = random.randint(15, 180)
-        start_date = timezone.now() - timedelta(days=days_ago)
-        
-        if status in ['completed', 'delivered']:
-            completion_date = start_date + timedelta(days=random.randint(2, 10))
-            Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+    # Generate 2-3 extra orders per gig to avoid clumping
+    for gig in gigs_list:
+        num_orders = random.randint(2, 3)
+        for _ in range(num_orders):
+            buyer = random.choice(buyers_list)
+            pkg = random.choice(packages)
+            status = random.choice(['completed', 'completed', 'delivered', 'in_progress', 'pending'])
+            amount = getattr(gig, f'price_{pkg}')
+            
+            order = Order.objects.create(
+                buyer=buyer, seller=gig.seller, gig=gig,
+                package=pkg, status=status, amount=amount,
+                requirements='Randomly generated requirements for this order.'
+            )
+            
+            # Timeline logic based on gig delivery time
+            delivery_days = getattr(gig, f'delivery_{pkg}')
             
             if status == 'completed':
+                days_ago = random.randint(delivery_days + 5, 180)
+                start_date = timezone.now() - timedelta(days=days_ago)
+                completion_date = start_date + timedelta(days=delivery_days + 1)
+                Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+                
                 Review.objects.create(
                     order=order, buyer=buyer, seller=gig.seller, gig=gig,
                     rating=random.choice([4, 5, 5, 5]), comment='Excellent work! Highly recommended.'
                 )
-        else:
-            Order.objects.filter(id=order.id).update(created_at=start_date)
+                
+                # Sync gig stats
+                gig.orders_completed += 1
+                gig.review_count += 1
+                gig.save()
+                
+            elif status == 'delivered':
+                start_date = timezone.now() - timedelta(days=delivery_days + 1)
+                completion_date = timezone.now() - timedelta(days=random.randint(0, 1))
+                Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+                
+            elif status in ['in_progress', 'accepted']:
+                days_ago = random.randint(2, max(2, delivery_days - 1))
+                start_date = timezone.now() - timedelta(days=days_ago)
+                Order.objects.filter(id=order.id).update(created_at=start_date)
+                
+            else:
+                start_date = timezone.now() - timedelta(days=random.randint(0, 1))
+                Order.objects.filter(id=order.id).update(created_at=start_date)
 
 print("\n" + "="*55)
 print("Done! Summary:")
