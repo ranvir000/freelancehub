@@ -31,7 +31,7 @@ export default function SellerDashboard() {
     toast(`Order ${status} ✅`)
   }
 
-  const completed  = orders.filter(o=>o.status==='completed')
+  const completed  = orders.filter(o=>['completed','delivered'].includes(o.status))
   const active     = orders.filter(o=>!['completed','cancelled'].includes(o.status))
   const earnings   = completed.reduce((s,o)=>s+Number(o.amount),0)
   const avgRating  = reviews.length ? (reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1) : '—'
@@ -41,7 +41,7 @@ export default function SellerDashboard() {
   const chartData = Array.from({length:6},(_,i)=>{
     const d = new Date(now.getFullYear(), now.getMonth()-(5-i), 1)
     const mo = orders.filter(o=>{
-      const od=new Date(o.created_at); return od.getFullYear()===d.getFullYear()&&od.getMonth()===d.getMonth()&&o.status==='completed'
+      const od=new Date(o.created_at); return od.getFullYear()===d.getFullYear()&&od.getMonth()===d.getMonth()&&['completed','delivered'].includes(o.status)
     })
     return { name:months[d.getMonth()], earnings: mo.reduce((s,o)=>s+Number(o.amount),0) }
   })

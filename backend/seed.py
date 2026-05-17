@@ -235,12 +235,53 @@ for f in FAV_DATA:
         Favourite.objects.create(**f)
 print(f"  OK Favourites: {len(FAV_DATA)} saved")
 
+# ── RANDOM EXTRA ORDERS ───────────────────────────────────────────────────
+if Order.objects.count() < 30:
+    print("Generating 40 random orders for realistic history...")
+    buyers_list = [alex, james, david, emily, michael]
+    gigs_list = list(Gig.objects.all())
+    packages = ['basic', 'standard', 'premium']
+    statuses = ['completed', 'completed', 'completed', 'delivered', 'in_progress', 'pending']
+    
+    for _ in range(40):
+        buyer = random.choice(buyers_list)
+        gig = random.choice(gigs_list)
+        pkg = random.choice(packages)
+        status = random.choice(statuses)
+        amount = getattr(gig, f'price_{pkg}')
+        
+        order = Order.objects.create(
+            buyer=buyer,
+            seller=gig.seller,
+            gig=gig,
+            package=pkg,
+            status=status,
+            amount=amount,
+            requirements='Randomly generated requirements for this order.'
+        )
+        
+        # Generate past dates
+        days_ago = random.randint(15, 180)
+        start_date = timezone.now() - timedelta(days=days_ago)
+        
+        if status in ['completed', 'delivered']:
+            completion_date = start_date + timedelta(days=random.randint(2, 10))
+            Order.objects.filter(id=order.id).update(created_at=start_date, updated_at=completion_date)
+            
+            if status == 'completed':
+                Review.objects.create(
+                    order=order, buyer=buyer, seller=gig.seller, gig=gig,
+                    rating=random.choice([4, 5, 5, 5]), comment='Excellent work! Highly recommended.'
+                )
+        else:
+            Order.objects.filter(id=order.id).update(created_at=start_date)
+
 print("\n" + "="*55)
 print("Done! Summary:")
 print("  11 users  (5 sellers, 5 buyers, 1 admin)")
 print("  16 gigs   (3-4 per seller)")
-print("  16 orders (mixed statuses)")
-print("   7 reviews on completed orders")
+print(f"  {Order.objects.count()} orders (mixed statuses)")
+print(f"  {Review.objects.count()} reviews")
 print("  14 messages across conversations")
 print("   9 favourites")
 print("\nLogin credentials:")
