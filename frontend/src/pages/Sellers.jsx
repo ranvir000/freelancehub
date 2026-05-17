@@ -1,31 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../App.jsx'
-import { Search, Star, MapPin, Briefcase } from 'lucide-react'
+import { Search, MapPin, Briefcase } from 'lucide-react'
 
-const MOCK_SELLERS = [
-  { id:1, name:'Ranvir Singh', bio:'Full-stack developer specializing in React, Django, and cloud solutions.', skills:['React','Django','PostgreSQL','AWS'], location:'Mumbai, India', hourly_rate:2500, total_earnings:450000, gig_count:5, completed_orders:128, avatar_url:'' },
-  { id:2, name:'Priya Kapoor', bio:'Brand designer and UI/UX specialist with 7 years creating stunning visuals.', skills:['Figma','Branding','Logo Design','Illustration'], location:'Delhi, India', hourly_rate:1800, total_earnings:320000, gig_count:8, completed_orders:310, avatar_url:'' },
-  { id:3, name:'Sara Liu',     bio:'Professional content writer with expertise in SEO and technical writing.', skills:['Blog Writing','SEO','Copywriting','Research'], location:'Bangalore, India', hourly_rate:1200, total_earnings:210000, gig_count:4, completed_orders:249, avatar_url:'' },
-  { id:4, name:'Alex Chen',   bio:'Data scientist & ML engineer helping businesses derive insights from data.', skills:['Python','TensorFlow','SQL','Tableau'], location:'Hyderabad, India', hourly_rate:3000, total_earnings:380000, gig_count:6, completed_orders:87, avatar_url:'' },
-  { id:5, name:'Neha Sharma', bio:'Digital marketing expert — growing brands through paid ads, SEO, and content.', skills:['Google Ads','Facebook Ads','SEO','Analytics'], location:'Pune, India', hourly_rate:1500, total_earnings:180000, gig_count:3, completed_orders:187, avatar_url:'' },
-  { id:6, name:'James Tran',  bio:'Video producer & editor creating engaging content for YouTube and social media.', skills:['Premiere Pro','After Effects','Color Grading','Motion Graphics'], location:'Chennai, India', hourly_rate:2000, total_earnings:260000, gig_count:5, completed_orders:134, avatar_url:'' },
-]
-
-const SKILLS = ['All','React','Python','Figma','SEO','Branding','Data Science','Video Editing','Django','Node.js']
+const SKILLS = ['All','React','Python','Figma','SEO','Branding','Video Editing','Django','Marketing','Writing']
 
 export default function Sellers() {
   const navigate = useNavigate()
-  const [sellers,  setSellers]  = useState(MOCK_SELLERS)
+  const [sellers,  setSellers]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [query,    setQuery]    = useState('')
   const [skill,    setSkill]    = useState('All')
 
   useEffect(() => {
+    setLoading(true)
     const p = {}
     if (query) p.search = query
     if (skill && skill !== 'All') p.skill = skill
-    api.get('/api/sellers/', { params: p }).then(r => { if (r.data.length) setSellers(r.data) }).catch(() => {}).finally(() => setLoading(false))
+    api.get('/api/sellers/', { params: p }).then(r => setSellers(r.data)).catch(() => setSellers([])).finally(() => setLoading(false))
   }, [query, skill])
 
   return (

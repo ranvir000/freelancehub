@@ -2,31 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api, useAuth, useToast, getGigImage } from '../App.jsx'
 
-// Mock sellers
-const MOCK_SELLERS = {
-  s1: { id:'s1', name:'Ranvir Singh', role:'seller', bio:'Final-year B.Tech CSE student at GZSCCET. Expert in React, Django, PostgreSQL. Passionate about building scalable web applications.', skills:['React','Django','PostgreSQL','JWT','REST API','Docker'], rating:'4.9', reviewCount:80, completedOrders:80, joinedDate:'January 2025', location:'Bathinda, Punjab', img:null, gigs:[1,5], reviews:[{name:'Alex M.',rating:5,text:'Outstanding work! Delivered a complete app ahead of schedule.',date:'2 days ago'},{name:'Vikram B.',rating:5,text:'Clean code, great documentation. Will hire again.',date:'1 week ago'},{name:'Meera P.',rating:4,text:'Good communication and quality work.',date:'2 weeks ago'}] },
-  s2: { id:'s2', name:'Neha Sharma', role:'seller', bio:'Creative designer specializing in brand identity and UI/UX. 3+ years of experience working with startups and SMEs across India.', skills:['Figma','Adobe Illustrator','Brand Identity','UI/UX','Logo Design','Prototyping'], rating:'4.8', reviewCount:204, completedOrders:204, joinedDate:'March 2024', location:'Chandigarh, Punjab', img:null, gigs:[2,6,10], reviews:[{name:'James T.',rating:5,text:'Amazing designs. Our brand looks world-class now!',date:'3 days ago'},{name:'Startup Founder.',rating:5,text:'Neha understood our vision perfectly.',date:'1 week ago'}] },
-  s3: { id:'s3', name:'Amit Verma',  role:'seller', bio:'Frontend developer focused on mobile-first experiences. Building responsive websites since 2022 with React and Tailwind CSS.', skills:['React','Tailwind CSS','HTML/CSS','SEO','Responsive Design'], rating:'4.7', reviewCount:89, completedOrders:89, joinedDate:'June 2024', location:'Ludhiana, Punjab', img:null, gigs:[3], reviews:[{name:'Dev K.',rating:5,text:'Super fast delivery and clean code.',date:'5 days ago'}] },
-  s4: { id:'s4', name:'Sara Liu',    role:'seller', bio:'Professional content writer and SEO specialist. Helping businesses rank on Google with high-quality, engaging content.', skills:['SEO Writing','Content Strategy','Keyword Research','Blog Posts','Technical Writing'], rating:'4.9', reviewCount:300, completedOrders:300, joinedDate:'November 2023', location:'Delhi, India', img:null, gigs:[4,9], reviews:[{name:'Amit V.',rating:5,text:'Traffic increased 40% after her articles!',date:'1 week ago'},{name:'Dev Team.',rating:5,text:'Best documentation we have ever had.',date:'2 weeks ago'}] },
-  s5: { id:'s5', name:'Kiran Mehta', role:'seller', bio:'Digital marketing expert specializing in paid ads and organic growth strategies. Managed ₹50L+ in ad spend across Google and Meta.', skills:['Google Ads','Meta Ads','SEO','Social Media','Analytics','PPC'], rating:'4.7', reviewCount:99, completedOrders:99, joinedDate:'February 2024', location:'Mumbai, Maharashtra', img:null, gigs:[7,11], reviews:[{name:'E-commerce Store.',rating:5,text:'ROAS went from 2x to 6x. Outstanding!',date:'1 month ago'},{name:'Meera P.',rating:5,text:'Followers grew 200% in one month!',date:'2 weeks ago'}] },
-  s6: { id:'s6', name:'Arjun Patel', role:'seller', bio:'Mobile and DevOps engineer. Built 4 apps on the Play Store. Expert in React Native, GitHub Actions, and cloud deployments.', skills:['React Native','GitHub Actions','Docker','AWS','CI/CD','iOS/Android'], rating:'4.9', reviewCount:73, completedOrders:73, joinedDate:'August 2024', location:'Ahmedabad, Gujarat', img:null, gigs:[8,12], reviews:[{name:'Rohan S.',rating:5,text:'App is live on Play Store. Amazing!',date:'3 weeks ago'},{name:'Dev Team.',rating:5,text:'Deploy time went from 2hr to 5min!',date:'3 weeks ago'}] },
-}
-
-const MOCK_GIGS = {
-  1: { title:'Full-stack web app with React & Django', category:'Development' },
-  2: { title:'Modern logo for your brand', category:'Design' },
-  3: { title:'Responsive website with React', category:'Development' },
-  4: { title:'SEO-optimized blog posts', category:'Writing' },
-  5: { title:'REST API with Django & PostgreSQL', category:'Development' },
-  6: { title:'Stunning UI/UX for your app', category:'Design' },
-  7: { title:'Social media marketing strategy', category:'Marketing' },
-  8: { title:'Mobile app with React Native', category:'Development' },
-  9: { title:'Professional technical documentation', category:'Writing' },
-  10: { title:'Brand identity and style guide', category:'Design' },
-  11: { title:'Google Ads campaigns & ROI', category:'Marketing' },
-  12: { title:'CI/CD pipeline with GitHub Actions', category:'Development' },
-}
-
 export default function UserProfile() {
   const { id } = useParams()
   const { user: currentUser } = useAuth()
@@ -37,28 +12,12 @@ export default function UserProfile() {
 
   useEffect(() => {
     setLoading(true)
-    // Try API first
     api.get(`/api/users/${id}/`).then(r => {
       setProfile(r.data)
       setLoading(false)
     }).catch(() => {
-      // Fall back to mock or current user
-      if (MOCK_SELLERS[id]) {
-        setProfile(MOCK_SELLERS[id])
-      } else if (currentUser && (id === 'me' || id === currentUser.id?.toString())) {
-        // Show current user's profile
-        setProfile({
-          ...currentUser,
-          bio: currentUser.bio || 'No bio yet.',
-          skills: currentUser.skills || [],
-          rating: currentUser.rating || null,
-          reviewCount: currentUser.reviewCount || 0,
-          completedOrders: currentUser.completedOrders || 0,
-          joinedDate: currentUser.joinedDate || 'Recently',
-          location: currentUser.location || 'India',
-          gigs: [],
-          reviews: [],
-        })
+      if (currentUser && (id === 'me' || id === currentUser.id?.toString())) {
+        setProfile({ ...currentUser, bio: currentUser.bio || '', skills: currentUser.skills || [], gigs: [], reviews: [] })
       } else {
         setProfile(null)
       }
@@ -204,32 +163,35 @@ export default function UserProfile() {
               </div>
             )}
 
-            {/* Active gigs */}
+            {/* Active gigs — uses real gigs array from API */}
             {profile.gigs?.length > 0 && (
               <div className="card" style={{ padding:24, marginBottom:20 }}>
                 <h2 style={{ fontSize:16, fontWeight:700, marginBottom:16, color:'var(--text)' }}>Active Gigs</h2>
                 <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                  {profile.gigs.map(gigId => (
-                    <div key={gigId}
-                      onClick={() => navigate(`/gig/${gigId}`)}
-                      style={{
-                        padding:'12px 16px', borderRadius:10, border:'1px solid var(--border)',
-                        cursor:'pointer', transition:'all 0.15s', background:'var(--card)',
-                        display:'flex', alignItems:'center', gap:12
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor='var(--brand)'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor='var(--border)'}
-                    >
-                      <div style={{
-                        width:80, height:60, borderRadius:8, flexShrink:0,
-                        background: `url(${getGigImage({id: gigId, category: MOCK_GIGS[gigId]?.category})}) center/cover`,
-                        backgroundColor: 'var(--brand-l)', border:'1px solid var(--border)'
-                      }} />
-                      <p style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>
-                        {MOCK_GIGS[gigId]?.title || `Gig #${gigId}`}
-                      </p>
-                    </div>
-                  ))}
+                  {profile.gigs.map(gig => {
+                    const gigId = typeof gig === 'object' ? gig.id : gig
+                    const gigTitle = typeof gig === 'object' ? gig.title : `Gig #${gigId}`
+                    const gigCategory = typeof gig === 'object' ? gig.category : 'Development'
+                    return (
+                      <div key={gigId}
+                        onClick={() => navigate(`/gig/${gigId}`)}
+                        style={{
+                          padding:'12px 16px', borderRadius:10, border:'1px solid var(--border)',
+                          cursor:'pointer', transition:'all 0.15s', background:'var(--card)',
+                          display:'flex', alignItems:'center', gap:12
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.borderColor='var(--brand)'}
+                        onMouseLeave={e => e.currentTarget.style.borderColor='var(--border)'}
+                      >
+                        <div style={{
+                          width:80, height:60, borderRadius:8, flexShrink:0,
+                          background: `url(${getGigImage({id: gigId, category: gigCategory})}) center/cover`,
+                          backgroundColor: 'var(--brand-l)', border:'1px solid var(--border)'
+                        }} />
+                        <p style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>{gigTitle}</p>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}

@@ -12,11 +12,7 @@ const STATUS_COLORS = {
   cancelled:  { bg:'#fee2e2', color:'#b91c1c', label:'Cancelled' },
 }
 
-const MOCK_ORDERS = [
-  { id:1, gig_title:'I will build a full-stack web app with React & Django', buyer_name:'Alex Morgan',  seller_name:'Ranvir Singh', buyer:999, seller:1, package:'standard', amount:4999, status:'in_progress', created_at:'2026-04-15' },
-  { id:2, gig_title:'I will design a modern logo for your brand',            buyer_name:'James Taylor', seller_name:'Neha Sharma',  buyer:998, seller:2, package:'basic',    amount:999,  status:'delivered',   created_at:'2026-04-18' },
-  { id:3, gig_title:'I will write SEO-optimized blog posts',                 buyer_name:'Alex Morgan',  seller_name:'Sara Liu',     buyer:999, seller:3, package:'standard', amount:999,  status:'completed',   created_at:'2026-04-10' },
-]
+
 
 // ── REVIEW MODAL ──────────────────────────────────────────────────────────────
 function ReviewModal({ order, onClose, onSubmit }) {
@@ -115,7 +111,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return
-    api.get('/api/orders/').then(r => setOrders(r.data)).catch(() => setOrders(MOCK_ORDERS)).finally(() => setLoading(false))
+    api.get('/api/orders/').then(r => setOrders(r.data)).catch(() => setOrders([])).finally(() => setLoading(false))
   }, [user])
 
   if (!user) return null

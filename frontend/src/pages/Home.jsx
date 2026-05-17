@@ -27,14 +27,7 @@ const HOW = [
   { step:'04', title:'Pay Securely',   desc:'Funds released only when you approve the delivered work.', icon:'🔒' },
 ]
 
-const MOCK_GIGS = [
-  { id:1, title:'I will build a full-stack React + Django web app', seller_name:'Ranvir Singh', seller_avatar:'', category:'Development', price_basic:2499, rating:4.9, review_count:87, orders_completed:128, badge:'Top Rated' },
-  { id:2, title:'I will design a modern brand identity and logo',   seller_name:'Priya Kapoor', seller_avatar:'', category:'Design',       price_basic:999,  rating:4.8, review_count:204, orders_completed:310, badge:'Best Seller' },
-  { id:3, title:'I will write SEO-optimized blog posts and articles',seller_name:'Sara Liu',    seller_avatar:'', category:'Writing',      price_basic:499,  rating:4.7, review_count:156, orders_completed:249, badge:'Popular' },
-  { id:4, title:'I will create professional video ads for social media',seller_name:'James T.', seller_avatar:'', category:'Video',        price_basic:1499, rating:5.0, review_count:42, orders_completed:67, badge:'Top Rated' },
-  { id:5, title:'I will build and manage your Google Ads campaigns', seller_name:'Neha S.',    seller_avatar:'', category:'Marketing',    price_basic:799,  rating:4.8, review_count:93, orders_completed:187, badge:'Best Seller' },
-  { id:6, title:'I will analyse your data and build ML models',     seller_name:'Alex Chen',   seller_avatar:'', category:'Data',         price_basic:3499, rating:4.9, review_count:38, orders_completed:54, badge:'Top Rated' },
-]
+
 
 const TESTIMONIALS = [
   { name:'Michael Torres', role:'Startup Founder', avatar:'MT', text:'Found an amazing React developer in under 10 minutes. The quality of work was exceptional and communication was smooth throughout. Highly recommend!', rating:5 },
@@ -88,11 +81,13 @@ export default function Home() {
   const navigate  = useNavigate()
   const { user }  = useAuth()
   const [query, setQuery]   = useState('')
-  const [gigs,  setGigs]    = useState(MOCK_GIGS)
+  const [gigs,  setGigs]    = useState([])
+  const [gigsLoading, setGigsLoading] = useState(true)
   const [favIds, setFavIds] = useState([])
 
   useEffect(() => {
-    api.get('/api/gigs/').then(r => { if (r.data.length) setGigs(r.data) }).catch(() => {})
+    setGigsLoading(true)
+    api.get('/api/gigs/').then(r => setGigs(r.data)).catch(() => setGigs([])).finally(() => setGigsLoading(false))
     if (user) {
       api.get('/api/favourites/').then(r => setFavIds(r.data.map(f => f.gig))).catch(() => {})
     }
@@ -205,13 +200,21 @@ export default function Home() {
             </div>
             <button onClick={() => navigate('/browse')} className="btn btn-outline" style={{ display:'flex', alignItems:'center', gap:6 }}>Browse All <ArrowRight size={14}/></button>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:20 }}>
-            {gigs.slice(0,6).map((gig,i) => (
-              <motion.div key={gig.id} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.07, duration:0.4 }} style={{ position:'relative' }}>
-                <GigCard gig={gig} onClick={() => navigate(`/gig/${gig.id}`)} onFav={toggleFav} favIds={favIds}/>
-              </motion.div>
-            ))}
-          </div>
+          {gigsLoading ? (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:20 }}>
+              {[1,2,3,4,5,6].map(i => <div key={i} className="skeleton" style={{ height:280 }}/>)}
+            </div>
+          ) : gigs.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'40px 0', color:'var(--muted)' }}>No gigs found.</div>
+          ) : (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:20 }}>
+              {gigs.slice(0,6).map((gig,i) => (
+                <motion.div key={gig.id} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.07, duration:0.4 }} style={{ position:'relative' }}>
+                  <GigCard gig={gig} onClick={() => navigate(`/gig/${gig.id}`)} onFav={toggleFav} favIds={favIds}/>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

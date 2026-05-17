@@ -110,29 +110,13 @@ export function AdminPanel() {
   const [loading, setLoading] = useState(true)
   const toast = useToast()
 
-  const MOCK_USERS  = [
-    { id:1, name:'Ranvir Singh', email:'ranvir@demo.com', role:'seller', date_joined:'2026-01-10' },
-    { id:2, name:'Priya Kapoor', email:'priya@demo.com',  role:'seller', date_joined:'2026-01-12' },
-    { id:3, name:'Alex Morgan',  email:'alex@demo.com',   role:'buyer',  date_joined:'2026-02-01' },
-    { id:4, name:'James Taylor', email:'james@demo.com',  role:'buyer',  date_joined:'2026-02-15' },
-    { id:5, name:'Sara Liu',     email:'sara@demo.com',   role:'seller', date_joined:'2026-03-01' },
-  ]
-  const MOCK_GIGS = [
-    { id:1, title:'Full-stack web app with React & Django', seller_name:'Ranvir Singh', category:'Development', price:2499, orders_completed:48, is_active:true },
-    { id:2, title:'Modern logo design for your brand',      seller_name:'Priya Kapoor', category:'Design',      price:999,  orders_completed:128, is_active:true },
-    { id:3, title:'SEO-optimized blog posts',               seller_name:'Sara Liu',     category:'Writing',     price:499,  orders_completed:203, is_active:true },
-  ]
-  const MOCK_ORDERS = [
-    { id:1, gig_title:'Full-stack web app', buyer_name:'Alex Morgan',  seller_name:'Ranvir Singh', amount:4999, status:'in_progress', created_at:'2026-04-15' },
-    { id:2, gig_title:'Logo design',        buyer_name:'James Taylor', seller_name:'Priya Kapoor', amount:999,  status:'delivered',    created_at:'2026-04-18' },
-    { id:3, gig_title:'Blog posts',         buyer_name:'Alex Morgan',  seller_name:'Sara Liu',     amount:999,  status:'completed',    created_at:'2026-04-10' },
-  ]
+
 
   useEffect(() => {
     Promise.all([
-      api.get('/api/admin/users/').catch(() => ({ data: MOCK_USERS })),
-      api.get('/api/admin/gigs/').catch(() => ({ data: MOCK_GIGS })),
-      api.get('/api/admin/orders/').catch(() => ({ data: MOCK_ORDERS })),
+      api.get('/api/admin/users/').catch(() => ({ data: [] })),
+      api.get('/api/admin/gigs/').catch(() => ({ data: [] })),
+      api.get('/api/admin/orders/').catch(() => ({ data: [] })),
     ]).then(([u, g, o]) => {
       setData({ users: u.data, gigs: g.data, orders: o.data })
     }).finally(() => setLoading(false))
