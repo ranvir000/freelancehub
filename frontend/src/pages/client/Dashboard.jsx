@@ -20,16 +20,20 @@ export default function ClientDashboard() {
   const [recGigs,  setRecGigs]  = useState([])
   const [loading,  setLoading]  = useState(true)
 
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
+
   useEffect(() => {
+    if (!userId) return
     Promise.all([
       api.get('/api/orders/').catch(() => ({ data: [] })),
       api.get('/api/gigs/').catch(() => ({ data: [] })),
     ]).then(([ord, gigs]) => {
-      const myOrders = ord.data.filter(o => o.buyer === user.id)
+      const myOrders = ord.data.filter(o => o.buyer === userId)
       setOrders(myOrders)
       setRecGigs(gigs.data.slice(0,4))
     }).finally(() => setLoading(false))
-  }, [user.id])
+  }, [userId])
 
   async function approveOrder(id) {
     await api.patch(`/api/orders/${id}/`, { status:'completed' }).catch(() => {})

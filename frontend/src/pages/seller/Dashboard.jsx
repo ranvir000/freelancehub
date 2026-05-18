@@ -14,17 +14,21 @@ export default function SellerDashboard() {
   const [loading,  setLoading]  = useState(true)
   const [processing, setProcessing] = useState(null)
 
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
+
   useEffect(() => {
+    if (!userId) return
     Promise.all([
       api.get('/api/orders/').catch(()=>({data:[]})),
-      api.get('/api/gigs/', {params:{seller:user.id}}).catch(()=>({data:[]})),
-      api.get('/api/reviews/', {params:{seller:user.id}}).catch(()=>({data:[]})),
+      api.get('/api/gigs/', {params:{seller:userId}}).catch(()=>({data:[]})),
+      api.get('/api/reviews/', {params:{seller:userId}}).catch(()=>({data:[]})),
     ]).then(([ord,gig,rev]) => {
-      setOrders(ord.data.filter(o=>o.seller===user.id))
+      setOrders(ord.data.filter(o=>o.seller===userId))
       setGigs(gig.data)
       setReviews(rev.data)
     }).finally(()=>setLoading(false))
-  }, [user.id])
+  }, [userId])
 
   async function updateStatus(order, status) {
     setProcessing(order.id)

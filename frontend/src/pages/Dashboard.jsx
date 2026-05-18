@@ -109,12 +109,16 @@ export default function Dashboard() {
   const [reviewOrder, setReviewOrder] = useState(null)
   const [reviews, setReviews] = useState({})
 
-  useEffect(() => {
-    if (!user) return
-    api.get('/api/orders/').then(r => setOrders(r.data)).catch(() => setOrders([])).finally(() => setLoading(false))
-  }, [user])
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
+  const userRole   = localUser?.role || user?.role
 
-  if (!user) return null
+  useEffect(() => {
+    if (!userId) return
+    api.get('/api/orders/').then(r => setOrders(r.data)).catch(() => setOrders([])).finally(() => setLoading(false))
+  }, [userId])
+
+  if (!userId) return null
 
   async function updateStatus(orderId, newStatus) {
     try {
@@ -134,9 +138,9 @@ export default function Dashboard() {
 
   // Bug fix: filter by user ID (not name) to correctly match real API orders
   const myOrders = orders.filter(o => {
-    if (user.role === 'admin')  return true
-    if (user.role === 'buyer')  return o.buyer  === user.id
-    if (user.role === 'seller') return o.seller === user.id
+    if (userRole === 'admin')  return true
+    if (userRole === 'buyer')  return o.buyer  === userId
+    if (userRole === 'seller') return o.seller === userId
     return false
   })
 
