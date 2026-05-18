@@ -1,12 +1,12 @@
 import sys
 
-with open('seed.py', 'r') as f:
+with open('seed.py', 'r', encoding='utf-8') as f:
     content = f.read()
 
 top_part = content.split('# ── ORDERS ─────────────────────────────────────────────────────────────────')[0]
 
 new_logic = """# ── ORDERS, REVIEWS, AND EARNINGS SYNC ────────────────────────────────────
-print("Generating completely dynamic and random orders for presentation...")
+print("Generating completely dynamic and balanced orders for presentation...")
 
 REVIEW_TEMPLATES = {
     'Development': ["Exceptional code quality!", "Delivered ahead of schedule. Highly recommended.", "Great communication and solid architecture.", "Exactly what I needed. Will hire again."],
@@ -27,16 +27,29 @@ from datetime import timedelta
 Order.objects.all().delete()
 Review.objects.all().delete()
 
+buyer_counts = {b: 0 for b in buyers_list}
+statuses_pool = ['completed', 'in_progress', 'pending', 'accepted', 'delivered', 'completed']
+
 for seller in sellers_list:
     seller_gigs = list(Gig.objects.filter(seller=seller))
     if not seller_gigs: continue
     
     num_orders = random.randint(3, 4)
+    
+    # Shuffle statuses so each seller gets a diverse mix of states
+    seller_statuses = statuses_pool.copy()
+    random.shuffle(seller_statuses)
+    
     for _ in range(num_orders):
-        buyer = random.choice(buyers_list)
+        # Pick a buyer who has the least amount of orders to balance them perfectly
+        min_count = min(buyer_counts[b] for b in buyers_list)
+        lowest_buyers = [b for b in buyers_list if buyer_counts[b] == min_count]
+        buyer = random.choice(lowest_buyers)
+        buyer_counts[buyer] += 1
+        
         gig = random.choice(seller_gigs)
         pkg = random.choice(packages)
-        status = random.choice(['pending', 'accepted', 'in_progress', 'delivered', 'completed', 'completed'])
+        status = seller_statuses.pop()
         amount = getattr(gig, f'price_{pkg}')
         
         order = Order.objects.create(
