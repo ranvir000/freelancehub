@@ -253,12 +253,15 @@ if Order.objects.count() < 30:
     sellers_list = [ranvir, sneha, sara, arjun, kiran]
     packages = ['basic', 'standard', 'premium']
     
-    # Generate 3-4 extra orders per seller total (across their gigs)
+    # Generate extra orders so each seller has exactly 3-4 total (including hardcoded)
     for seller in sellers_list:
         seller_gigs = list(Gig.objects.filter(seller=seller))
         if not seller_gigs: continue
         
-        num_orders = random.randint(3, 4)
+        existing_count = Order.objects.filter(seller=seller).count()
+        target_orders = random.randint(3, 4)
+        num_orders = max(0, target_orders - existing_count)
+        
         for _ in range(num_orders):
             buyer = random.choice(buyers_list)
             gig = random.choice(seller_gigs)
