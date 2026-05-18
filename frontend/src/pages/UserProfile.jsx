@@ -149,11 +149,11 @@ export default function UserProfile() {
             </div>
 
             {/* Skills */}
-            {profile.skills?.length > 0 && (
+            {profile.skills_list?.length > 0 && (
               <div className="card" style={{ padding:24, marginBottom:20 }}>
                 <h2 style={{ fontSize:16, fontWeight:700, marginBottom:12, color:'var(--text)' }}>Skills</h2>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-                  {profile.skills.map(s => (
+                  {profile.skills_list.map(s => (
                     <span key={s} style={{
                       background:'var(--brand-l)', color:'var(--brand)',
                       padding:'4px 12px', borderRadius:20, fontSize:12, fontWeight:600

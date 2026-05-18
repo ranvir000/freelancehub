@@ -8,15 +8,28 @@ class UserSerializer(serializers.ModelSerializer):
     name           = serializers.ReadOnlyField()
     total_earnings = serializers.ReadOnlyField()
     skills_list    = serializers.ReadOnlyField()
+    gigs           = serializers.SerializerMethodField()
+    reviews        = serializers.SerializerMethodField()
 
     class Meta:
         model  = User
         fields = [
             'id', 'username', 'name', 'email', 'role', 'bio',
             'skills', 'skills_list', 'location', 'avatar_url',
-            'hourly_rate', 'total_earnings',
+            'hourly_rate', 'total_earnings', 'gigs', 'reviews',
         ]
         read_only_fields = ['id']
+
+    def get_gigs(self, obj):
+        return [{'id': g.id, 'title': g.title, 'category': g.category} for g in obj.gigs.filter(is_active=True)]
+
+    def get_reviews(self, obj):
+        return [{
+            'name': r.buyer.name,
+            'rating': r.rating,
+            'date': r.created_at.strftime('%Y-%m-%d') if r.created_at else 'Recently',
+            'text': r.comment
+        } for r in obj.reviews_received.all()]
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

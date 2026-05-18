@@ -15,10 +15,15 @@ export default function AdminUsers() {
     api.get('/api/admin/users/').then(r=>setUsers(r.data)).catch(()=>{}).finally(()=>setLoading(false))
   }, [])
 
-  async function changeRole(id, role) {
-    try { await api.patch(`/api/admin/users/${id}/`, { role }) } catch {}
-    setUsers(p => p.map(u => u.id===id ? {...u, role} : u))
-    toast(`Role changed to ${role}`)
+  async function deleteUser(id, name) {
+    if (!window.confirm(`Are you absolutely sure you want to delete user "${name}"? This action is permanent and will delete all their gigs, orders, and reviews.`)) return
+    try {
+      await api.delete(`/api/admin/users/${id}/`)
+      setUsers(p => p.filter(u => u.id !== id))
+      toast(`✅ User "${name}" deleted successfully`)
+    } catch (e) {
+      toast(e.response?.data?.error || 'Failed to delete user', 'error')
+    }
   }
 
   async function resetPassword() {
@@ -93,7 +98,7 @@ export default function AdminUsers() {
       <div className="card" style={{overflow:'auto'}}>
         {loading ? [1,2,3,4,5].map(i=><div key={i} className="skeleton" style={{height:56,margin:8}}/>) : (
           <table className="data-table">
-            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Gigs</th><th>Change Role</th><th>Password</th></tr></thead>
+            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Gigs</th><th>Password</th><th>Actions</th></tr></thead>
             <tbody>
               {filtered.map(u=>(
                 <tr key={u.id}>
@@ -110,14 +115,6 @@ export default function AdminUsers() {
                   <td style={{color:'var(--muted)',fontSize:12}}>{u.date_joined}</td>
                   <td style={{color:'var(--muted)',fontSize:12}}>{u.gig_count||0}</td>
                   <td>
-                    <select value={u.role} onChange={e=>changeRole(u.id,e.target.value)}
-                      style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:6,padding:'4px 8px',fontSize:12,color:'var(--text)',cursor:'pointer'}}>
-                      <option value="buyer">Buyer</option>
-                      <option value="seller">Seller</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </td>
-                  <td>
                     <button
                       onClick={() => { setResetModal({ id: u.id, name: u.name }); setNewPw('demo1234') }}
                       style={{ background:'none', border:'1px solid var(--border)', borderRadius:6, padding:'4px 10px', cursor:'pointer', display:'flex', alignItems:'center', gap:4, fontSize:12, color:'var(--text)' }}
@@ -125,6 +122,21 @@ export default function AdminUsers() {
                     >
                       <KeyRound size={13}/> Reset
                     </button>
+                  </td>
+                  <td>
+                    {u.role !== 'admin' ? (
+                      <button
+                        onClick={() => deleteUser(u.id, u.name)}
+                        style={{ background:'none', border:'1px solid rgba(239, 68, 68, 0.3)', borderRadius:6, padding:'4px 10px', cursor:'pointer', fontSize:12, color:'rgb(239, 68, 68)', fontWeight:600 }}
+                        title="Delete user permanently"
+                        onMouseEnter={e => { e.currentTarget.style.background='rgba(239, 68, 68, 0.1)'; e.currentTarget.style.borderColor='rgb(239, 68, 68)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background='none'; e.currentTarget.style.borderColor='rgba(239, 68, 68, 0.3)' }}
+                      >
+                        🗑️ Delete
+                      </button>
+                    ) : (
+                      <span style={{ color:'var(--muted)', fontSize:12 }}>Protected</span>
+                    )}
                   </td>
                 </tr>
               ))}

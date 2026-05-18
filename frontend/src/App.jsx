@@ -431,21 +431,28 @@ function ChatWidget() {
   const isMessagesPage = loc.pathname.includes('/messages')
   if (!user || isMessagesPage) return null
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault()
     if (!input.trim()) return
     const userMsg = input.trim()
     setMsgs(p => [...p, { text: userMsg, isUser: true }])
     setInput('')
     setTyping(true)
-    // Realistic delay (1-2s) then show a rotating reply
-    const delay = 1000 + Math.random() * 800
-    setTimeout(() => {
-      const reply = SUPPORT_REPLIES[replyIdx.current % SUPPORT_REPLIES.length]
-      replyIdx.current += 1
-      setTyping(false)
-      setMsgs(p => [...p, { text: reply, isUser: false }])
-    }, delay)
+    const delay = 800 + Math.random() * 600
+    try {
+      const res = await api.post('/api/support/chat/', { message: userMsg })
+      setTimeout(() => {
+        setTyping(false)
+        setMsgs(p => [...p, { text: res.data.reply, isUser: false }])
+      }, delay)
+    } catch {
+      setTimeout(() => {
+        const reply = SUPPORT_REPLIES[replyIdx.current % SUPPORT_REPLIES.length]
+        replyIdx.current += 1
+        setTyping(false)
+        setMsgs(p => [...p, { text: reply, isUser: false }])
+      }, delay)
+    }
   }
 
   return (

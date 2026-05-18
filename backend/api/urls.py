@@ -8,6 +8,7 @@ from .views import (
     MessageListCreateView, UnreadCountView,
     FavouriteListView, FavouriteToggleView,
     AdminUsersView, AdminGigsView, AdminOrdersView,
+    SupportChatView,
 )
 
 urlpatterns = [
@@ -19,6 +20,7 @@ urlpatterns = [
     # Users
     path('users/<pk>/',    UserDetailView.as_view()),
     path('sellers/',       SellerListView.as_view()),
+    path('support/chat/',  SupportChatView.as_view()),
 
     # Gigs
     path('gigs/',           GigListCreateView.as_view()),

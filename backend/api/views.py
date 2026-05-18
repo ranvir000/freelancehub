@@ -368,14 +368,25 @@ class AdminUsersView(APIView):
         try:
             user = User.objects.get(pk=pk)
             if 'role' in request.data:
-                user.role = request.data['role']
-                user.save()
+                return Response({'error': 'Role modifications are strictly prohibited.'}, status=400)
             if 'password' in request.data:
                 new_pw = request.data['password']
                 if len(new_pw) < 6:
                     return Response({'error': 'Password must be at least 6 characters'}, status=400)
                 user.set_password(new_pw)
                 user.save()
+            return Response({'success': True})
+        except User.DoesNotExist:
+            return Response({'error': 'Not found'}, status=404)
+
+    def delete(self, request, pk):
+        if request.user.role != 'admin':
+            return Response({'error': 'Admin only'}, status=403)
+        try:
+            user = User.objects.get(pk=pk)
+            if user == request.user:
+                return Response({'error': 'You cannot delete your own admin account.'}, status=400)
+            user.delete()
             return Response({'success': True})
         except User.DoesNotExist:
             return Response({'error': 'Not found'}, status=404)
@@ -442,3 +453,32 @@ class AdminOrdersView(APIView):
             return Response({'success': True})
         except Order.DoesNotExist:
             return Response({'error': 'Not found'}, status=404)
+
+
+class SupportChatView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        message = request.data.get('message', '').strip().lower()
+        if not message:
+            return Response({'reply': "I didn't catch that. Could you please send a question?"})
+
+        # Match keywords for highly contextual, intelligent responses
+        if any(w in message for w in ['gig', 'post', 'create service']):
+            reply = "To post a gig, switch to your **Seller Portal**, click **Manage Gigs**, and press the **+ Post a Gig** button. You can customize standard, standard, and premium packages there! 🚀"
+        elif any(w in message for w in ['earning', 'withdraw', 'payout', 'money', 'revenue']):
+            reply = "Earnings are credited instantly to your balance as soon as a buyer approves and marks your order as **Completed**. You can view your current ledger under the **Seller Earnings** tab. 💰"
+        elif any(w in message for w in ['order', 'track', 'progress', 'status']):
+            reply = "All active transactions can be tracked on the **Orders** page of your portal dashboard. You can easily view the timeline states: *pending, accepted, in progress, delivered, or completed*! 📈"
+        elif any(w in message for w in ['message', 'chat', 'contact', 'inbox']):
+            reply = "You can chat directly with buyers or sellers using our **Live Inbox**! Simply click the **✉️ Message** button on any Gig detail page or user profile card to start a real-time conversation. 💬"
+        elif any(w in message for w in ['role', 'buyer', 'seller', 'switch', 'change portal']):
+            reply = "FreelanceHub features full role-awareness! To switch between buying and selling, click your profile avatar in the sidebar and choose the **Switch Portal** link. 🔄"
+        elif any(w in message for w in ['hello', 'hi', 'hey', 'greetings']):
+            reply = "Hello there! 👋 I am your FreelanceHub virtual assistant. Ask me anything about Gigs, Orders, Inbox messaging, or Earnings tracking!"
+        elif any(w in message for w in ['thanks', 'thank you', 'cool', 'awesome']):
+            reply = "You are very welcome! Let me know if you need help with anything else. Good luck! 👍"
+        else:
+            reply = "That is an excellent question! I suggest checking out our **'How It Works'** guide on the navbar, or visiting your dashboard portal to get started! Let me know if I can explain further. 😊"
+
+        return Response({'reply': reply})
