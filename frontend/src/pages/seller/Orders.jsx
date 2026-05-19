@@ -19,9 +19,13 @@ export default function SellerOrders() {
   const [processing, setProcessing] = useState(null)
   const [tab,      setTab]     = useState('all')
 
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
+
   useEffect(() => {
-    api.get('/api/orders/').then(r=>setOrders(r.data.filter(o=>o.seller===user.id))).catch(()=>{}).finally(()=>setLoading(false))
-  }, [user.id])
+    if (!userId) return
+    api.get('/api/orders/').then(r=>setOrders(r.data.filter(o=>o.seller===userId))).catch(()=>{}).finally(()=>setLoading(false))
+  }, [userId])
 
   async function update(order, status) {
     setProcessing(order.id)

@@ -22,9 +22,13 @@ export default function ClientOrders() {
   const [review,  setReview]  = useState(null)
   const [reviewForm, setReviewForm] = useState({ rating:5, comment:'' })
 
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
+
   useEffect(() => {
-    api.get('/api/orders/').then(r => setOrders(r.data.filter(o => o.buyer === user.id))).catch(()=>{}).finally(()=>setLoading(false))
-  }, [user.id])
+    if (!userId) return
+    api.get('/api/orders/').then(r => setOrders(r.data.filter(o => o.buyer === userId))).catch(()=>{}).finally(()=>setLoading(false))
+  }, [userId])
 
   async function approveOrder(id) {
     try { await api.patch(`/api/orders/${id}/`, { status:'completed' }) } catch {}

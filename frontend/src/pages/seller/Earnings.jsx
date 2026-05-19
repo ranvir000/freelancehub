@@ -8,9 +8,13 @@ export default function SellerEarnings() {
   const [orders,  setOrders]  = useState([])
   const [loading, setLoading] = useState(true)
 
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
+
   useEffect(() => {
-    api.get('/api/orders/').then(r=>setOrders(r.data.filter(o=>o.seller===user.id))).catch(()=>{}).finally(()=>setLoading(false))
-  }, [user.id])
+    if (!userId) return
+    api.get('/api/orders/').then(r=>setOrders(r.data.filter(o=>o.seller===userId))).catch(()=>{}).finally(()=>setLoading(false))
+  }, [userId])
 
   const completed = orders.filter(o=>o.status==='completed')
   const pending   = orders.filter(o=>o.status==='delivered')

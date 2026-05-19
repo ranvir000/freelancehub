@@ -9,10 +9,15 @@ export default function SellerGigs() {
   const navigate   = useNavigate()
   const [gigs,     setGigs]    = useState([])
   const [loading,  setLoading] = useState(true)
+  const [tab, setTab] = useState('active')
+
+  const localUser  = JSON.parse(localStorage.getItem('fh_user') || 'null') || user
+  const userId     = localUser?.id
 
   useEffect(() => {
-    api.get('/api/gigs/', { params:{ seller: user.id } }).then(r=>setGigs(r.data)).catch(()=>{}).finally(()=>setLoading(false))
-  }, [user.id])
+    if (!userId) return
+    api.get('/api/gigs/', { params:{ seller: userId } }).then(r=>setGigs(r.data)).catch(()=>{}).finally(()=>setLoading(false))
+  }, [userId])
 
   async function toggleActive(gig) {
     try { await api.patch(`/api/gigs/${gig.id}/`, { is_active: !gig.is_active }) } catch {}

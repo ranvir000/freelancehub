@@ -34,6 +34,20 @@ const ROLES = [
     ],
     features: ['Post unlimited gigs', 'Manage orders', 'Message buyers', 'Track earnings', 'Build your profile'],
   },
+  {
+    key: 'admin',
+    label: 'Platform Admin',
+    emoji: '🛡️',
+    color: '#ef4444',
+    bg: 'linear-gradient(135deg,#dc2626,#ef4444)',
+    desc: 'Manage users, monitor gigs, and oversee platform operations',
+    steps: [
+      { icon: '👥', title: 'User Management', desc: 'View all registered users, reset passwords, and securely manage or delete accounts.' },
+      { icon: '🛒', title: 'Monitor Gigs', desc: 'Oversee all marketplace listings. Disable or remove inappropriate content instantly.' },
+      { icon: '📊', title: 'Track Orders', desc: 'Monitor all transactions and order statuses across the platform to ensure smooth operations.' },
+    ],
+    features: ['Reset passwords', 'Delete users', 'Disable gigs', 'View all transactions', 'Global oversight'],
+  },
 ]
 
 const PLATFORM_FEATURES = [
