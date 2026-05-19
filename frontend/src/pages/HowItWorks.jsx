@@ -34,20 +34,6 @@ const ROLES = [
     ],
     features: ['Post unlimited gigs', 'Manage orders', 'Message buyers', 'Track earnings', 'Build your profile'],
   },
-  {
-    key: 'admin',
-    label: 'Platform Admin',
-    emoji: '🛡️',
-    color: '#ef4444',
-    bg: 'linear-gradient(135deg,#dc2626,#ef4444)',
-    desc: 'Manage users, monitor gigs, and oversee platform operations',
-    steps: [
-      { icon: '👥', title: 'User Management', desc: 'View all registered users, reset passwords, and securely manage or delete accounts.' },
-      { icon: '🛒', title: 'Monitor Gigs', desc: 'Oversee all marketplace listings. Disable or remove inappropriate content instantly.' },
-      { icon: '📊', title: 'Track Orders', desc: 'Monitor all transactions and order statuses across the platform to ensure smooth operations.' },
-    ],
-    features: ['Reset passwords', 'Delete users', 'Disable gigs', 'View all transactions', 'Global oversight'],
-  },
 ]
 
 const PLATFORM_FEATURES = [
@@ -58,7 +44,7 @@ const PLATFORM_FEATURES = [
   { icon: '❤️', title: 'Favourites', desc: 'Buyers can save gigs they like for later. Favourites are stored per user account.' },
   { icon: '🌙', title: 'Dark / Light Mode', desc: 'Full theme switcher persisted in localStorage. Every component responds to the active theme.' },
   { icon: '📱', title: 'Responsive Design', desc: 'Works on desktop, tablet and mobile. Sidebar collapses on small screens.' },
-  { icon: '🛡️', title: 'Role-based Access', desc: 'Three distinct roles — Buyer, Seller, Admin — each with a dedicated portal and permissions.' },
+  { icon: '🛡️', title: 'Role-based Access', desc: 'Two distinct roles — Buyer, Seller — each with a dedicated portal and permissions.' },
 ]
 
 const TECH_STACK = [
@@ -101,7 +87,7 @@ export default function HowItWorks() {
         {/* ── Role Selector ── */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <h2 style={{ fontSize: 26, fontWeight: 800, color: 'var(--text)', marginBottom: 8 }}>Choose Your Role</h2>
-          <p style={{ color: 'var(--muted)', marginBottom: 28 }}>FreelanceHub has three distinct user types, each with their own portal</p>
+          <p style={{ color: 'var(--muted)', marginBottom: 28 }}>FreelanceHub has two distinct user types, each with their own portal</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             {ROLES.map(r => (
               <button
